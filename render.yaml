@@ -13,19 +13,19 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: "*.onrender.com,127.0.0.1,localhost"
+        value: "dioceseofiligan.onrender.com,127.0.0.1,localhost"
       - key: DATABASE_URL
         fromDatabase:
           name: churchiligan-db
           property: connectionString
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://*.onrender.com,http://127.0.0.1:8000,http://localhost:8000"
+        value: "https://dioceseofiligan.onrender.com,http://127.0.0.1:8000,http://localhost:8000"
       - key: GOOGLE_OAUTH_CLIENT_ID
         value: ""
       - key: GOOGLE_OAUTH_CLIENT_SECRET
         value: ""
       - key: GOOGLE_OAUTH_REDIRECT_URI
-        value: "https://churchiligan.onrender.com/google/callback/"
+        value: "https://dioceseofiligan.onrender.com/google/callback/"
       - key: EMAIL_BACKEND
         value: "django.core.mail.backends.smtp.EmailBackend"
       - key: EMAIL_HOST
@@ -48,7 +48,7 @@ services:
       # GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET
       # Set these in Render Dashboard for security
       - key: GOOGLE_OAUTH_REDIRECT_URI
-        value: "https://churchiligan.onrender.com/google/callback/"
+        value: "https://dioceseofiligan.onrender.com/google/callback/"
       - key: STATIC_VERSION
         value: "1"
       - key: DJANGO_SETTINGS_MODULE
