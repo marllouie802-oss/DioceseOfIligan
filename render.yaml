@@ -47,8 +47,6 @@ services:
       # DO NOT commit API keys to git
       # GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET
       # Set these in Render Dashboard for security
-      - key: GOOGLE_OAUTH_REDIRECT_URI
-        value: "https://dioceseofiligan.onrender.com/google/callback/"
       - key: STATIC_VERSION
         value: "1"
       - key: DJANGO_SETTINGS_MODULE
