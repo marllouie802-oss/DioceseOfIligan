@@ -9797,3 +9797,17 @@ def global_search(request):
         'churches': church_results,
         'posts': post_results
     })
+
+
+def privacy_policy(request):
+    """Privacy Policy page for OAuth compliance."""
+    return render(request, 'core/privacy_policy.html', {
+        'today': datetime.now().date()
+    })
+
+
+def terms_of_service(request):
+    """Terms of Service page for OAuth compliance.""" 
+    return render(request, 'core/terms_of_service.html', {
+        'today': datetime.now().date()
+    })
