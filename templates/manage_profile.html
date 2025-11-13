@@ -945,6 +945,125 @@
       }
     }
     
+    /* ========== DONATION RECEIPT STYLES ========== */
+    .actions-cell {
+      text-align: center;
+      vertical-align: middle;
+      padding: 12px 8px;
+    }
+    
+    .btn-action {
+      background: var(--brand);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+    
+    .btn-action:hover {
+      background: var(--accent-blue);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(30, 144, 255, 0.2);
+    }
+    
+    .btn-receipt {
+      background: linear-gradient(135deg, var(--brand) 0%, var(--accent-blue) 100%);
+    }
+    
+    .no-actions {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    
+    /* Receipt Modal */
+    .receipt-modal {
+      max-width: 600px;
+      width: 90%;
+    }
+    
+    .receipt-header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--brand);
+      padding-bottom: 20px;
+    }
+    
+    .receipt-title {
+      color: var(--brand);
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0;
+    }
+    
+    .receipt-subtitle {
+      color: var(--muted);
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    
+    .receipt-number {
+      color: var(--text);
+      font-weight: 600;
+      margin: 10px 0 0 0;
+    }
+    
+    .receipt-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    .receipt-table td {
+      padding: 12px 8px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: top;
+    }
+    
+    .receipt-table td:first-child {
+      font-weight: bold;
+      width: 140px;
+      color: var(--muted);
+    }
+    
+    .receipt-table td:last-child {
+      color: var(--text);
+    }
+    
+    .amount-highlight {
+      color: var(--brand);
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    @media (max-width: 768px) {
+      .btn-action .btn-text {
+        display: none;
+      }
+      
+      .btn-action {
+        padding: 8px 10px;
+      }
+      
+      .receipt-table td:first-child {
+        width: 100px;
+        font-size: 12px;
+        padding: 8px 4px;
+      }
+      
+      .receipt-table td:last-child {
+        padding: 8px 4px;
+        font-size: 14px;
+      }
+    }
+    
     /* Activity Stats Grid */
     .activity-stats-grid {
       display: grid;
@@ -1726,6 +1845,7 @@
               <th>Status</th>
               <th>Date</th>
               <th>Method</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -1820,11 +1940,27 @@
                       {{ donation.get_payment_method_display }}
                     {% endif %}
                   </td>
+                  <td class="actions-cell">
+                    {% if donation.payment_status == 'completed' %}
+                      <button type="button" class="btn-action btn-receipt" onclick="viewDonationReceipt('{{ donation.id }}')" title="View Receipt">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                          <polyline points="14 2 14 8 20 8"/>
+                          <line x1="16" y1="13" x2="8" y2="13"/>
+                          <line x1="16" y1="17" x2="8" y2="17"/>
+                          <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        <span class="btn-text">Receipt</span>
+                      </button>
+                    {% else %}
+                      <span class="no-actions">—</span>
+                    {% endif %}
+                  </td>
                 </tr>
               {% endfor %}
             {% else %}
               <tr>
-                <td colspan="6" class="empty-row">
+                <td colspan="7" class="empty-row">
                   <div class="empty-donations">
                     <div class="empty-icon">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3533,5 +3669,195 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+// Donation Receipt Modal Functions
+function viewDonationReceipt(donationId) {
+  // Show loading state
+  const button = event.target.closest('.btn-receipt');
+  const originalText = button.innerHTML;
+  button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Loading...';
+  button.disabled = true;
+  
+  // Fetch donation details and show receipt modal
+  fetch(`/app/api/donation/${donationId}/receipt/`, {
+    method: 'GET',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Failed to load receipt (${response.status})`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      showReceiptModal(data.receipt);
+    } else {
+      throw new Error(data.message || 'Failed to load receipt');
+    }
+  })
+  .catch(error => {
+    console.error('Receipt error:', error);
+    alert('Error loading receipt: ' + error.message);
+  })
+  .finally(() => {
+    // Restore button state
+    button.innerHTML = originalText;
+    button.disabled = false;
+  });
+}
+
+function showReceiptModal(receipt) {
+  const modal = document.getElementById('donationReceiptModal');
+  
+  // Populate modal with receipt data
+  document.getElementById('receiptNumber').textContent = receipt.receipt_number;
+  document.getElementById('receiptDate').textContent = receipt.date;
+  document.getElementById('receiptDonorName').textContent = receipt.donor_name;
+  document.getElementById('receiptChurchName').textContent = receipt.church_name;
+  document.getElementById('receiptPostContent').textContent = receipt.post_content;
+  document.getElementById('receiptAmount').textContent = receipt.amount;
+  document.getElementById('receiptPaymentMethod').textContent = receipt.payment_method;
+  document.getElementById('receiptTransactionId').textContent = receipt.transaction_id;
+  
+  if (receipt.donor_message) {
+    document.getElementById('receiptMessage').textContent = receipt.donor_message;
+    document.getElementById('receiptMessageRow').style.display = 'table-row';
+  } else {
+    document.getElementById('receiptMessageRow').style.display = 'none';
+  }
+  
+  // Show modal
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReceiptModal() {
+  const modal = document.getElementById('donationReceiptModal');
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function printReceipt() {
+  const receiptContent = document.getElementById('receiptContent');
+  const printWindow = window.open('', '_blank');
+  
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Donation Receipt</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+        .receipt-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1E90FF; padding-bottom: 20px; }
+        .receipt-title { color: #1E90FF; font-size: 24px; font-weight: bold; margin: 0; }
+        .receipt-subtitle { color: #666; margin: 5px 0; }
+        .receipt-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .receipt-table td { padding: 10px; border-bottom: 1px solid #eee; }
+        .receipt-table td:first-child { font-weight: bold; width: 150px; color: #555; }
+        .amount-highlight { color: #1E90FF; font-size: 18px; font-weight: bold; }
+        .receipt-footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 14px; }
+        @media print { body { margin: 0; } .no-print { display: none; } }
+      </style>
+    </head>
+    <body>
+      ${receiptContent.innerHTML}
+      <div class="receipt-footer">
+        <p>Thank you for your generous donation!</p>
+        <p><strong>ChurchConnect</strong> - Connecting Communities</p>
+      </div>
+    </body>
+    </html>
+  `);
+  
+  printWindow.document.close();
+  printWindow.print();
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('donationReceiptModal');
+  if (e.target === modal) {
+    closeReceiptModal();
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('donationReceiptModal');
+    if (modal && modal.style.display === 'flex') {
+      closeReceiptModal();
+    }
+  }
+});
 </script>
+
+<!-- Donation Receipt Modal -->
+<div id="donationReceiptModal" class="modal-overlay" style="display: none;">
+  <div class="modal-content receipt-modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Donation Receipt</h3>
+      <button type="button" class="modal-close" onclick="closeReceiptModal()">&times;</button>
+    </div>
+    
+    <div class="modal-body" id="receiptContent">
+      <div class="receipt-header">
+        <h2 class="receipt-title">ChurchConnect</h2>
+        <p class="receipt-subtitle">Donation Receipt</p>
+        <p class="receipt-number">Receipt #<span id="receiptNumber"></span></p>
+      </div>
+      
+      <table class="receipt-table">
+        <tr>
+          <td>Date:</td>
+          <td id="receiptDate"></td>
+        </tr>
+        <tr>
+          <td>Donor:</td>
+          <td id="receiptDonorName"></td>
+        </tr>
+        <tr>
+          <td>Church:</td>
+          <td id="receiptChurchName"></td>
+        </tr>
+        <tr>
+          <td>Post:</td>
+          <td id="receiptPostContent"></td>
+        </tr>
+        <tr id="receiptMessageRow" style="display: none;">
+          <td>Message:</td>
+          <td id="receiptMessage"></td>
+        </tr>
+        <tr>
+          <td>Amount:</td>
+          <td class="amount-highlight">₱<span id="receiptAmount"></span></td>
+        </tr>
+        <tr>
+          <td>Payment Method:</td>
+          <td id="receiptPaymentMethod"></td>
+        </tr>
+        <tr>
+          <td>Transaction ID:</td>
+          <td id="receiptTransactionId"></td>
+        </tr>
+      </table>
+    </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeReceiptModal()">Close</button>
+      <button type="button" class="btn btn-primary" onclick="printReceipt()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Print Receipt
+      </button>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

@@ -9800,6 +9800,80 @@ def global_search(request):
     })
 
 
+@login_required
+def donation_receipt_api(request, donation_id):
+    """API endpoint to get donation receipt data."""
+    from django.http import JsonResponse
+    from django.shortcuts import get_object_or_404
+    from .models import Donation
+    
+    # Only allow GET requests
+    if request.method != 'GET':
+        return JsonResponse({
+            'success': False,
+            'message': 'Only GET requests are allowed.'
+        }, status=405)
+    
+    try:
+        # Get the donation and verify ownership
+        donation = get_object_or_404(
+            Donation.objects.select_related('post', 'post__church', 'donor'),
+            id=donation_id,
+            donor=request.user
+        )
+        
+        # Only show receipts for completed donations
+        if donation.payment_status != 'completed':
+            return JsonResponse({
+                'success': False,
+                'message': 'Receipt is only available for completed donations.'
+            }, status=400)
+        
+        # Generate receipt number (if not already exists)
+        receipt_number = f"CC-{donation.id:06d}"
+        
+        # Get transaction ID based on payment method
+        transaction_id = 'N/A'
+        if donation.payment_method == 'paypal' and donation.paypal_transaction_id:
+            transaction_id = donation.paypal_transaction_id
+            receipt_number = f"CC-{donation.paypal_transaction_id[-8:]}"
+        elif donation.payment_method == 'stripe' and donation.stripe_charge_id:
+            transaction_id = donation.stripe_charge_id
+            receipt_number = f"CC-{donation.stripe_charge_id[-8:]}"
+        
+        # Get payment method display name
+        payment_method_display = donation.get_payment_method_display()
+        
+        # Prepare receipt data
+        receipt_data = {
+            'receipt_number': receipt_number,
+            'date': donation.completed_at.strftime('%B %d, %Y at %I:%M %p') if donation.completed_at else donation.created_at.strftime('%B %d, %Y at %I:%M %p'),
+            'donor_name': request.user.get_full_name() or request.user.username,
+            'church_name': donation.post.church.name,
+            'post_content': donation.post.content[:100] + ('...' if len(donation.post.content) > 100 else ''),
+            'amount': f"{donation.amount:.2f}",
+            'payment_method': payment_method_display,
+            'transaction_id': transaction_id,
+            'donor_message': donation.message if donation.message else None,
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'receipt': receipt_data
+        })
+        
+    except Donation.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Donation not found or access denied.'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred while generating the receipt.'
+        }, status=500)
+
+
 def privacy_policy(request):
     """Privacy Policy page for OAuth compliance."""
     return render(request, 'core/privacy_policy.html', {

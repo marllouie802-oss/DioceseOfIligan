@@ -3540,13 +3540,15 @@ body.page-church-detail {
   padding: 0;
 }
 
-/* Overall Rating Section */
+/* Overall Rating Section - Blue Sky Theme */
 .overall-rating-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--brand) 0%, var(--accent-blue) 100%);
   border-radius: 16px;
   padding: 2rem;
   margin-bottom: 2rem;
   color: white;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(30, 144, 255, 0.2);
 }
 
 .overall-rating-header {
@@ -3657,18 +3659,18 @@ body.page-church-detail {
   justify-content: space-between;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .reviews-header h3 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
   margin: 0;
 }
 
 .reviews-count {
-  color: #6b7280;
+  color: var(--muted);
   font-size: 0.9rem;
   margin: 0;
 }
@@ -3680,19 +3682,20 @@ body.page-church-detail {
 }
 
 .review-card-enhanced {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 1.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
 }
 
 .review-card-enhanced:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+  border-color: var(--border-dark);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  background: var(--gradient-card-hover);
 }
 
 .review-main {
@@ -3711,21 +3714,21 @@ body.page-church-detail {
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #f3f4f6;
+  border: 2px solid var(--border-light);
 }
 
 .avatar-placeholder {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-brand);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 1.1rem;
-  border: 2px solid #f3f4f6;
+  border: 2px solid var(--border-light);
 }
 
 .verified-badge {
@@ -3777,7 +3780,7 @@ body.page-church-detail {
 .reviewer-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
   margin: 0;
 }
 
@@ -3790,14 +3793,14 @@ body.page-church-detail {
 
 .review-date {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .service-tag-inline {
-  background: #f0f9ff;
-  color: #0284c7;
+  background: var(--bg-medium);
+  color: var(--brand);
   padding: 0.2rem 0.5rem;
-  border-radius: 0;
+  border-radius: var(--radius-xs);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -3856,14 +3859,14 @@ body.page-church-detail {
 .review-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
   margin: 0 0 0.5rem 0;
   line-height: 1.4;
 }
 
 .review-comment {
   font-size: 0.9rem;
-  color: #4b5563;
+  color: var(--muted);
   line-height: 1.5;
   margin: 0;
 }
@@ -3872,7 +3875,7 @@ body.page-church-detail {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #6b7280;
+  color: var(--muted);
   font-size: 0.85rem;
   margin-top: 0.5rem;
 }
@@ -3887,19 +3890,19 @@ body.page-church-detail {
   margin-top: 1.5rem;
   text-align: center;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
 }
 
 .view-all-reviews {
-  color: #3b82f6;
+  color: var(--brand);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .view-all-reviews:hover {
-  color: #2563eb;
+  color: var(--accent-blue);
   text-decoration: underline;
 }
 

@@ -213,6 +213,9 @@ urlpatterns = [
     path('api/booking/<int:booking_id>/payment/stripe/create/', booking_payment_views.create_stripe_booking_payment, name='create_stripe_booking_payment'),
     path('api/booking/<int:booking_id>/payment/stripe/confirm/', booking_payment_views.confirm_stripe_booking_payment, name='confirm_stripe_booking_payment'),
     
+    # Donation Receipt API
+    path('api/donation/<int:donation_id>/receipt/', views.donation_receipt_api, name='donation_receipt_api'),
+    
     # Legal pages for OAuth compliance
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('terms-of-service/', views.terms_of_service, name='terms_of_service'),

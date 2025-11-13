@@ -160,4 +160,218 @@
 <script defer src="{% static 'js/settings-navigation.js' %}?v={{ STATIC_VERSION }}"></script>
 <script defer src="{% static 'js/settings-section-edit.js' %}?v={{ STATIC_VERSION }}"></script>
 <script defer src="{% static 'js/create_booking_manual.js' %}?v={{ STATIC_VERSION }}"></script>
+
+{# Event Creation Modal JavaScript #}
+<script>
+// Event Creation Modal Functions
+function openEventCreationModal() {
+  const modal = document.getElementById('eventsCreatePostModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Focus on event title field
+    setTimeout(() => {
+      const titleField = document.getElementById('events-event-title');
+      if (titleField) titleField.focus();
+    }, 100);
+  }
+}
+
+function hideEventCreationModal() {
+  const modal = document.getElementById('eventsCreatePostModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    
+    // Reset form
+    const form = document.getElementById('eventsCreatePostForm');
+    if (form) {
+      form.reset();
+      // Clear image previews
+      const previewContainer = document.getElementById('events-images-preview');
+      if (previewContainer) {
+        previewContainer.innerHTML = '';
+        previewContainer.style.display = 'none';
+      }
+      // Reset character count
+      const charCount = document.getElementById('events-char-count');
+      if (charCount) charCount.textContent = '0';
+      // Hide donation fields
+      const donationFields = document.getElementById('events-donation-fields');
+      if (donationFields) donationFields.style.display = 'none';
+    }
+  }
+}
+
+// Handle form submission
+document.addEventListener('DOMContentLoaded', function() {
+  const eventsForm = document.getElementById('eventsCreatePostForm');
+  if (eventsForm) {
+    eventsForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('events-submit-btn');
+      const submitText = submitBtn.querySelector('.submit-text');
+      const submitLoading = submitBtn.querySelector('.submit-loading');
+      const messageDiv = document.getElementById('events-post-creation-message');
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitText.style.display = 'none';
+      submitLoading.style.display = 'inline-flex';
+      
+      // Prepare form data
+      const formData = new FormData(eventsForm);
+      
+      fetch(eventsForm.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          messageDiv.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+          messageDiv.style.display = 'block';
+          
+          // Close modal after short delay
+          setTimeout(() => {
+            hideEventCreationModal();
+            // Reload the events tab to show new event
+            window.location.reload();
+          }, 1500);
+        } else {
+          messageDiv.innerHTML = '<div class="alert alert-error">' + data.message + '</div>';
+          messageDiv.style.display = 'block';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-error">An error occurred while creating the event.</div>';
+        messageDiv.style.display = 'block';
+      })
+      .finally(() => {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitText.style.display = 'inline';
+        submitLoading.style.display = 'none';
+      });
+    });
+  }
+  
+  // Character counting for event description
+  const eventsTextarea = document.getElementById('events-post-content');
+  const eventsCharCount = document.getElementById('events-char-count');
+  if (eventsTextarea && eventsCharCount) {
+    eventsTextarea.addEventListener('input', function() {
+      const count = this.value.length;
+      eventsCharCount.textContent = count;
+      
+      if (count > 950) {
+        eventsCharCount.style.color = '#e74c3c';
+      } else if (count > 800) {
+        eventsCharCount.style.color = '#f39c12';
+      } else {
+        eventsCharCount.style.color = '';
+      }
+    });
+  }
+  
+  // Donation toggle functionality
+  const eventsDonationToggle = document.getElementById('events-enable-donation');
+  const eventsDonationFields = document.getElementById('events-donation-fields');
+  if (eventsDonationToggle && eventsDonationFields) {
+    eventsDonationToggle.addEventListener('change', function() {
+      const hasPaypal = this.getAttribute('data-has-paypal') === 'true';
+      
+      if (this.checked && hasPaypal) {
+        eventsDonationFields.style.display = 'block';
+      } else {
+        eventsDonationFields.style.display = 'none';
+        if (this.checked && !hasPaypal) {
+          this.checked = false;
+          alert('Please set up your PayPal email in Church Settings before enabling donations.');
+        }
+      }
+    });
+  }
+  
+  // Image preview functionality
+  const eventsImageInput = document.getElementById('events-post-images');
+  const eventsPreviewContainer = document.getElementById('events-images-preview');
+  if (eventsImageInput && eventsPreviewContainer) {
+    eventsImageInput.addEventListener('change', function() {
+      eventsPreviewContainer.innerHTML = '';
+      const files = Array.from(this.files);
+      
+      if (files.length > 0) {
+        eventsPreviewContainer.style.display = 'block';
+        
+        files.slice(0, 10).forEach((file, index) => {
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const preview = document.createElement('div');
+              preview.className = 'image-preview-item';
+              preview.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                <button type="button" class="remove-image" onclick="removeEventImage(${index})">×</button>
+              `;
+              eventsPreviewContainer.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      } else {
+        eventsPreviewContainer.style.display = 'none';
+      }
+    });
+  }
+});
+
+// Remove image from preview
+function removeEventImage(index) {
+  const input = document.getElementById('events-post-images');
+  const container = document.getElementById('events-images-preview');
+  
+  if (input && container) {
+    const dt = new DataTransfer();
+    const files = Array.from(input.files);
+    
+    files.forEach((file, i) => {
+      if (i !== index) {
+        dt.items.add(file);
+      }
+    });
+    
+    input.files = dt.files;
+    
+    // Trigger change event to update preview
+    const event = new Event('change', { bubbles: true });
+    input.dispatchEvent(event);
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('eventsCreatePostModal');
+  if (e.target === modal) {
+    hideEventCreationModal();
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('eventsCreatePostModal');
+    if (modal && modal.style.display === 'flex') {
+      hideEventCreationModal();
+    }
+  }
+});
+</script>
 {% endblock %}

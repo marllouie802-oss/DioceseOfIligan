@@ -152,8 +152,8 @@
               <div class="review-card-enhanced" onclick="location.href='{% url 'core:service_reviews' review.service.id %}'">
                 <div class="review-main">
                   <div class="reviewer-avatar">
-                    {% if review.user.profile.profile_picture %}
-                      <img src="{{ review.user.profile.profile_picture.url }}" alt="{{ review.reviewer_name }}" class="avatar-img">
+                    {% if review.user.profile.profile_image %}
+                      <img src="{{ review.user.profile.profile_image.url }}" alt="{{ review.reviewer_name }}" class="avatar-img">
                     {% else %}
                       <div class="avatar-placeholder">
                         {{ review.reviewer_name|first|upper }}
