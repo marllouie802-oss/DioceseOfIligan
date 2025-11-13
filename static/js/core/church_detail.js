@@ -75,6 +75,9 @@ document.addEventListener('DOMContentLoaded', function() {
     tabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     panels.forEach(p => p.classList.toggle('active', p.id === name));
   }
+  
+  // Make activateTab globally accessible for sidebar onclick handlers
+  window.activateTab = activateTab;
   tabButtons.forEach(b => b.addEventListener('click', () => activateTab(b.dataset.tab)));
   
   // Check for URL parameters and hash to activate tab and scroll to post
@@ -331,6 +334,22 @@ function scrollToPost(postId) {
     }
   }, 100);
 }
+
+// Filter posts by type (for sidebar "View All" link)
+function filterPosts(type) {
+  // This function can be expanded to filter posts
+  // For now, just scroll to the posts section
+  if (type === 'with-images') {
+    const postsSection = document.getElementById('posts');
+    if (postsSection) {
+      postsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+}
+
+// Make functions globally accessible
+window.scrollToPost = scrollToPost;
+window.filterPosts = filterPosts;
 
 /**
  * Opens the location in a maps application using coordinates
