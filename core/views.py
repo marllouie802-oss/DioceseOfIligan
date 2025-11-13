@@ -444,10 +444,11 @@ def church_detail(request, slug):
     essential_missing = list(essential.get('missing', []))
     
     # Get posts with images for photo gallery (limit to recent 9 photos for a 3x3 grid, can show more)
+    from django.db.models import Q
     photo_posts = church.posts.filter(
-        is_active=True,
-        image__isnull=False
-    ).exclude(image='').order_by('-created_at')[:9]
+        Q(is_active=True) & 
+        (Q(image__isnull=False) & ~Q(image='') | Q(images__isnull=False))
+    ).distinct().order_by('-created_at')[:9]
     
     # Get event posts for Events tab
     event_posts = church.posts.filter(

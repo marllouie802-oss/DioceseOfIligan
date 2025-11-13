@@ -44,7 +44,11 @@
       <div class="photo-gallery-grid">
         {% for post in photo_posts %}
           <a href="#posts" onclick="activateTab('posts'); scrollToPost({{ post.id }});" class="photo-item" title="View post">
-            <img src="{{ post.image.url }}" alt="Church photo" loading="lazy">
+            {% if post.image %}
+              <img src="{{ post.image.url }}" alt="Church photo" loading="lazy">
+            {% elif post.images.exists %}
+              <img src="{{ post.images.first.image.url }}" alt="Church photo" loading="lazy">
+            {% endif %}
             <div class="photo-overlay">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
