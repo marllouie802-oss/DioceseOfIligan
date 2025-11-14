@@ -482,6 +482,55 @@
     color: #1E90FF !important;
     background: rgba(30, 144, 255, 0.1) !important;
   }
+
+  /* Add scroll functionality to sidebar sections */
+  .upcoming-events {
+    max-height: 400px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(30, 144, 255, 0.3) transparent !important;
+  }
+
+  .upcoming-events::-webkit-scrollbar {
+    width: 6px !important;
+  }
+
+  .upcoming-events::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
+
+  .upcoming-events::-webkit-scrollbar-thumb {
+    background: rgba(30, 144, 255, 0.3) !important;
+    border-radius: 3px !important;
+  }
+
+  .upcoming-events::-webkit-scrollbar-thumb:hover {
+    background: rgba(30, 144, 255, 0.5) !important;
+  }
+
+  .following-churches {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(30, 144, 255, 0.3) transparent !important;
+  }
+
+  .following-churches::-webkit-scrollbar {
+    width: 6px !important;
+  }
+
+  .following-churches::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
+
+  .following-churches::-webkit-scrollbar-thumb {
+    background: rgba(30, 144, 255, 0.3) !important;
+    border-radius: 3px !important;
+  }
+
+  .following-churches::-webkit-scrollbar-thumb:hover {
+    background: rgba(30, 144, 255, 0.5) !important;
+  }
 </style>
 {% endblock %}
 
