@@ -3949,9 +3949,13 @@ def create_service(request):
                 })
             messages.success(request, f'Service "{service.name}" has been created successfully!')
             
-            # Redirect super-admin to super-admin services page, others to manage church page
+            # Redirect super-admin based on context, others to manage church page
             if request.user.is_superuser:
-                return redirect('core:super_admin_services')
+                # If church_id was provided (came from church detail page), redirect back there
+                if church_id:
+                    return redirect('core:super_admin_church_detail', church_id=church.id)
+                else:
+                    return redirect('core:super_admin_services')
             return HttpResponseRedirect(reverse('core:manage_church', kwargs={'church_id': church.id}) + '?tab=services')
         else:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -4024,9 +4028,9 @@ def edit_service(request, service_id):
                 })
             messages.success(request, f'Service "{service.name}" has been updated successfully!')
             
-            # Redirect super-admin to super-admin services page, others to manage church page
+            # Redirect super-admin to super-admin church detail page, others to manage church page
             if request.user.is_superuser:
-                return redirect('core:super_admin_services')
+                return redirect('core:super_admin_church_detail', church_id=church.id)
             return HttpResponseRedirect(reverse('core:manage_church', kwargs={'church_id': church.id}) + '?tab=services')
         else:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -4066,11 +4070,13 @@ def delete_service(request, service_id):
     service = get_object_or_404(BookableService, id=service_id)
     church = service.church
     
-    # Check if user can manage services (Owner or Secretary)
-    can_manage, role = user_can_manage_church(request.user, church, ['services'])
-    if not can_manage:
-        messages.error(request, "You don't have permission to delete services.")
-        return redirect('core:select_church')
+    # Allow super-admin to delete any service
+    if not request.user.is_superuser:
+        # Check if user can manage services (Owner or Secretary)
+        can_manage, role = user_can_manage_church(request.user, church, ['services'])
+        if not can_manage:
+            messages.error(request, "You don't have permission to delete services.")
+            return redirect('core:select_church')
     
     if request.method == 'POST':
         service_name = service.name
@@ -4091,6 +4097,10 @@ def delete_service(request, service_id):
         
         service.delete()
         messages.success(request, f'Service "{service_name}" has been deleted successfully!')
+        
+        # Redirect super-admin to super-admin church detail page, others to manage church page
+        if request.user.is_superuser:
+            return redirect('core:super_admin_church_detail', church_id=church.id)
         return HttpResponseRedirect(reverse('core:manage_church', kwargs={'church_id': church.id}) + '?tab=services')
     
     # If GET request, show confirmation page (keeping old logic below for compatibility)
@@ -5183,6 +5193,124 @@ def super_admin_church_detail(request, church_id):
         church=church
     ).select_related('submitted_by', 'reviewed_by').prefetch_related('documents').order_by('-created_at')
     
+    # Get bookings data for appointments tab
+    bookings = Booking.objects.filter(
+        church=church
+    ).select_related('service', 'service__category', 'user', 'user__profile').order_by('-created_at')[:20]
+    
+    # Booking statistics
+    pending_bookings = Booking.objects.filter(church=church, status=Booking.STATUS_REQUESTED).count()
+    completed_bookings = Booking.objects.filter(church=church, status=Booking.STATUS_COMPLETED).count()
+    
+    # Get followers data
+    from datetime import timedelta
+    last_7_days = timezone.now() - timedelta(days=7)
+    
+    recent_followers = ChurchFollow.objects.filter(
+        church=church
+    ).select_related('user', 'user__profile').order_by('-followed_at')[:20]
+    
+    followers_this_week = ChurchFollow.objects.filter(
+        church=church,
+        followed_at__gte=last_7_days
+    ).count()
+    
+    # Active followers (users who have interacted with church posts in last 30 days)
+    last_30_days = timezone.now() - timedelta(days=30)
+    active_follower_ids = set(
+        list(PostLike.objects.filter(
+            post__church=church,
+            created_at__gte=last_30_days
+        ).values_list('user_id', flat=True)) +
+        list(PostComment.objects.filter(
+            post__church=church,
+            created_at__gte=last_30_days
+        ).values_list('user_id', flat=True))
+    )
+    active_followers = ChurchFollow.objects.filter(
+        church=church,
+        user_id__in=active_follower_ids
+    ).count()
+    
+    # Get availability data
+    availability_records = church.availability.all().order_by('date')
+    
+    # Get event posts data
+    event_posts = church.posts.filter(
+        is_active=True,
+        post_type='event'
+    ).order_by('-created_at')[:20]
+    event_posts_count = church.posts.filter(
+        is_active=True,
+        post_type='event'
+    ).count()
+    
+    # Get enhanced content/posts data with analytics
+    from django.db.models import Count, Q
+    posts_with_analytics = church.posts.filter(is_active=True).annotate(
+        likes_count=Count('likes', distinct=True),
+        comments_count=Count('comments', filter=Q(comments__is_active=True), distinct=True),
+        bookmarks_count=Count('bookmarks', distinct=True)
+    ).order_by('-created_at')[:20]
+    
+    # Content analytics
+    total_posts = church.posts.filter(is_active=True).count()
+    posts_last_30_days = church.posts.filter(
+        is_active=True, 
+        created_at__date__gte=last_30_days
+    ).count()
+    total_likes = PostLike.objects.filter(post__church=church, post__is_active=True).count()
+    total_comments = PostComment.objects.filter(post__church=church, post__is_active=True).count()
+    total_views = church.posts.filter(is_active=True).aggregate(
+        total_views=Sum('view_count')
+    )['total_views'] or 0
+    
+    # Get donations data
+    from decimal import Decimal
+    donations_queryset = Donation.objects.filter(
+        post__church=church
+    ).select_related('donor', 'donor__profile', 'post').order_by('-created_at')
+    
+    recent_donations = list(donations_queryset[:20])
+    total_donations = donations_queryset.filter(payment_status='completed').count()
+    total_donation_amount = donations_queryset.filter(payment_status='completed').aggregate(
+        total=Sum('amount')
+    )['total'] or Decimal('0.00')
+    
+    # This month's donations
+    current_month_start = timezone.now().date().replace(day=1)
+    this_month_donations = donations_queryset.filter(
+        payment_status='completed',
+        created_at__date__gte=current_month_start
+    )
+    this_month_donation_amount = this_month_donations.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    this_month_donation_count = this_month_donations.count()
+    
+    # Unique donors count
+    unique_donors = donations_queryset.filter(payment_status='completed').values('donor').distinct().count()
+    
+    # Get transactions data (bookings with payment)
+    transactions_queryset = Booking.objects.filter(
+        church=church,
+        payment_method__isnull=False
+    ).exclude(
+        payment_method=''
+    ).select_related('service', 'service__category', 'user', 'user__profile').order_by('-payment_date', '-created_at')
+    
+    recent_transactions = list(transactions_queryset[:20])
+    total_revenue = transactions_queryset.filter(payment_status='paid').aggregate(
+        total=Sum('payment_amount')
+    )['total'] or Decimal('0.00')
+    completed_transactions = transactions_queryset.filter(payment_status='paid').count()
+    pending_transactions = transactions_queryset.filter(payment_status='pending').count()
+    
+    # This month's transactions
+    this_month_transactions = transactions_queryset.filter(
+        payment_status='paid',
+        payment_date__gte=current_month_start
+    )
+    this_month_revenue = this_month_transactions.aggregate(total=Sum('payment_amount'))['total'] or Decimal('0.00')
+    
     # === CHART DATA CALCULATIONS ===
     
     # 1. Booking Trends (Last 30 days)
@@ -5334,6 +5462,39 @@ def super_admin_church_detail(request, church_id):
         'followers_count': followers_count,
         'staff_members': staff_members,
         'verification_requests': verification_requests,
+        # Bookings data
+        'bookings': bookings,
+        'pending_bookings': pending_bookings,
+        'completed_bookings': completed_bookings,
+        # Followers data
+        'recent_followers': recent_followers,
+        'followers_this_week': followers_this_week,
+        'active_followers': active_followers,
+        # Availability data
+        'availability_records': availability_records,
+        # Events data
+        'event_posts': event_posts,
+        'event_posts_count': event_posts_count,
+        # Content data
+        'posts_with_analytics': posts_with_analytics,
+        'total_posts': total_posts,
+        'posts_last_30_days': posts_last_30_days,
+        'total_likes': total_likes,
+        'total_comments': total_comments,
+        'total_views': total_views,
+        # Donations data
+        'recent_donations': recent_donations,
+        'total_donations': total_donations,
+        'total_donation_amount': total_donation_amount,
+        'this_month_donation_amount': this_month_donation_amount,
+        'this_month_donation_count': this_month_donation_count,
+        'unique_donors': unique_donors,
+        # Transactions data
+        'recent_transactions': recent_transactions,
+        'total_revenue': total_revenue,
+        'completed_transactions': completed_transactions,
+        'pending_transactions': pending_transactions,
+        'this_month_revenue': this_month_revenue,
         # Chart data
         'booking_trends': booking_trends,
         'popular_services': popular_services,

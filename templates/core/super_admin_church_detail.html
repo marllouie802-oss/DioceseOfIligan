@@ -312,6 +312,15 @@
       </svg>
       Church Profile
     </button>
+    <button class="tab-btn" onclick="switchTab('appointments')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Appointments
+    </button>
     <button class="tab-btn" onclick="switchTab('services')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
@@ -319,12 +328,51 @@
       </svg>
       Services ({{ services.count }})
     </button>
-    <button class="tab-btn" onclick="switchTab('posts')">
+    <button class="tab-btn" onclick="switchTab('availability')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12,6 12,12 16,14"/>
+      </svg>
+      Availability
+    </button>
+    <button class="tab-btn" onclick="switchTab('events')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      Events
+    </button>
+    <button class="tab-btn" onclick="switchTab('content')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
+        <polyline points="14,2 14,8 20,8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10,9 9,9 8,9"/>
       </svg>
-      Posts ({{ posts.count }})
+      Content
+    </button>
+    <button class="tab-btn" onclick="switchTab('donations')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      Donations
+    </button>
+    <button class="tab-btn" onclick="switchTab('transactions')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <line x1="2" y1="10" x2="22" y2="10"/>
+      </svg>
+      Transactions
+    </button>
+    <button class="tab-btn" onclick="switchTab('followers')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      Followers
     </button>
     <button class="tab-btn" onclick="switchTab('staff')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -494,13 +542,22 @@
   <!-- Services Tab -->
   <div class="tab-content" id="tab-services">
     <div style="background: white; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(30, 144, 255, 0.08); border: 1px solid rgba(30, 144, 255, 0.1);">
-      <h2 style="font-size: 1.5rem; font-weight: 700; color: #1A3A52; margin: 0 0 1.5rem 0; display: flex; align-items: center; gap: 0.75rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(30, 144, 255, 0.15);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #1E90FF;">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
-        Bookable Services ({{ services.count }})
-      </h2>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(30, 144, 255, 0.15);">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1A3A52; margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #1E90FF;">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Bookable Services ({{ services.count }})
+        </h2>
+        <a href="{% url 'core:create_service' %}?church_id={{ church.id }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #1E90FF 0%, #4169E1 100%); color: white; border: none; border-radius: 8px; font-size: 0.9375rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.2s;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Create Service
+        </a>
+      </div>
     
     {% if services %}
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
@@ -516,7 +573,27 @@
           {% endwith %}
         </div>
         <div style="padding: 1.5rem;">
-          <h4 style="font-size: 1.25rem; font-weight: 700; color: #1A3A52; margin: 0 0 0.75rem 0; line-height: 1.3;">{{ service.name }}</h4>
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem;">
+            <h4 style="font-size: 1.25rem; font-weight: 700; color: #1A3A52; margin: 0; line-height: 1.3; flex: 1;">{{ service.name }}</h4>
+            {% if service.is_active %}
+            <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.75rem; background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); color: #166534; border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; flex-shrink: 0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              Active
+            </span>
+            {% else %}
+            <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.75rem; background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); color: #991b1b; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; flex-shrink: 0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+              Inactive
+            </span>
+            {% endif %}
+          </div>
           <p style="font-size: 0.9375rem; color: #6b7280; line-height: 1.6; margin: 0 0 1.25rem 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{{ service.description|default:"No description provided." }}</p>
           <div style="display: flex; gap: 1.25rem; align-items: center; padding-top: 1.25rem; border-top: 1px solid rgba(30, 144, 255, 0.1);">
             <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #1E90FF; font-weight: 600;">
@@ -533,6 +610,34 @@
               </svg>
               <span>{{ service.price_display }}</span>
             </div>
+          </div>
+          
+          <!-- Service Actions -->
+          <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(30, 144, 255, 0.1);">
+            <a href="{% url 'core:edit_service' service.id %}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(30, 144, 255, 0.1); color: #1E90FF; border: 1px solid rgba(30, 144, 255, 0.2); border-radius: 6px; font-size: 0.8125rem; font-weight: 600; text-decoration: none; transition: all 0.2s;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Edit
+            </a>
+            <a href="{% url 'core:delete_service' service.id %}" onclick="return confirm('Are you sure you want to delete this service? This action cannot be undone.')" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 6px; font-size: 0.8125rem; font-weight: 600; text-decoration: none; transition: all 0.2s;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+              </svg>
+              Delete
+            </a>
+            <a href="{% url 'core:service_gallery' service.id %}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(34, 197, 94, 0.1); color: #16a34a; border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 6px; font-size: 0.8125rem; font-weight: 600; text-decoration: none; transition: all 0.2s;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              </svg>
+              Gallery
+            </a>
           </div>
         </div>
       </div>
@@ -753,6 +858,509 @@
           <p style="margin: 0; font-size: 1.125rem; font-weight: 500;">No parish administrators added yet.</p>
         </div>
       {% endif %}
+    </div>
+  </div>
+
+  <!-- Appointments Tab -->
+  <div class="tab-content" id="tab-appointments">
+    <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(30, 144, 255, 0.08); border: 1px solid rgba(30, 144, 255, 0.1);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(30, 144, 255, 0.15);">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1A3A52; margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #1E90FF;">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Appointments Management
+        </h2>
+      </div>
+      
+      <!-- Appointment Statistics -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #F0F8FF 0%, #E8F4FF 100%); border: 1px solid rgba(30, 144, 255, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #1E90FF; margin-bottom: 0.5rem;">{{ bookings.count|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Appointments</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #d97706; margin-bottom: 0.5rem;">{{ pending_bookings|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Pending Review</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #16a34a; margin-bottom: 0.5rem;">{{ completed_bookings|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Completed</div>
+        </div>
+      </div>
+
+      <!-- Recent Appointments -->
+      <div style="margin-top: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1A3A52; margin-bottom: 1rem;">Recent Appointments</h3>
+        {% if bookings %}
+          <div style="display: grid; gap: 1rem;">
+            {% for booking in bookings|slice:":10" %}
+            <div style="background: #f8fafc; border: 1px solid rgba(30, 144, 255, 0.1); border-radius: 8px; padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #1A3A52; margin: 0;">{{ booking.service.name }}</h4>
+                    <span style="padding: 0.25rem 0.75rem; {% if booking.status == 'requested' %}background: #fef3c7; color: #92400e;{% elif booking.status == 'approved' %}background: #dcfce7; color: #166534;{% elif booking.status == 'completed' %}background: #dbeafe; color: #1e40af;{% else %}background: #fee2e2; color: #991b1b;{% endif %} border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+                      {{ booking.get_status_display }}
+                    </span>
+                  </div>
+                  <div style="display: flex; gap: 2rem; color: #6b7280; font-size: 0.875rem;">
+                    <div><strong>Client:</strong> {{ booking.user.get_full_name|default:booking.user.username }}</div>
+                    <div><strong>Date:</strong> {{ booking.date|date:"M d, Y" }}</div>
+                    <div><strong>Time:</strong> {{ booking.time|time:"g:i A" }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 1rem; color: #d1d5db;">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <p style="margin: 0; font-size: 1rem; font-weight: 500;">No appointments found.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Availability Tab -->
+  <div class="tab-content" id="tab-availability">
+    <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(30, 144, 255, 0.08); border: 1px solid rgba(30, 144, 255, 0.1);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(30, 144, 255, 0.15);">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1A3A52; margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #1E90FF;">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12,6 12,12 16,14"/>
+          </svg>
+          Availability Management ({{ availability_records.count }})
+        </h2>
+      </div>
+      
+      <!-- Availability Statistics -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #F0F8FF 0%, #E8F4FF 100%); border: 1px solid rgba(30, 144, 255, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #1E90FF; margin-bottom: 0.5rem;">{{ availability_records.count|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Records</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #dc2626; margin-bottom: 0.5rem;">
+            {% with closed_count=availability_records|length %}{{ closed_count|default:"0" }}{% endwith %}
+          </div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Closed Dates</div>
+        </div>
+      </div>
+
+      <!-- Availability Records -->
+      <div style="margin-top: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1A3A52; margin-bottom: 1rem;">Availability Records</h3>
+        {% if availability_records %}
+          <div style="display: grid; gap: 1rem;">
+            {% for availability in availability_records %}
+            <div style="background: #f8fafc; border: 1px solid rgba(30, 144, 255, 0.1); border-radius: 8px; padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #1A3A52; margin: 0;">{{ availability.date|date:"M d, Y" }}</h4>
+                    <span style="padding: 0.25rem 0.75rem; {% if availability.is_closed %}background: #fee2e2; color: #991b1b;{% else %}background: #dcfce7; color: #166534;{% endif %} border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+                      {% if availability.is_closed %}Closed{% else %}Special Hours{% endif %}
+                    </span>
+                  </div>
+                  {% if availability.reason %}
+                  <p style="color: #6b7280; font-size: 0.875rem; margin: 0 0 0.5rem 0;">{{ availability.reason }}</p>
+                  {% endif %}
+                  {% if availability.special_hours %}
+                  <p style="color: #6b7280; font-size: 0.875rem; margin: 0;"><strong>Special Hours:</strong> {{ availability.special_hours }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 1rem; color: #d1d5db;">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            <p style="margin: 0; font-size: 1rem; font-weight: 500;">No availability records found.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Events Tab -->
+  <div class="tab-content" id="tab-events">
+    <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(30, 144, 255, 0.08); border: 1px solid rgba(30, 144, 255, 0.1);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(30, 144, 255, 0.15);">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1A3A52; margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #1E90FF;">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Events Management ({{ event_posts_count }})
+        </h2>
+      </div>
+      
+      <!-- Event Statistics -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #F0F8FF 0%, #E8F4FF 100%); border: 1px solid rgba(30, 144, 255, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #1E90FF; margin-bottom: 0.5rem;">{{ event_posts_count|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Events</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #16a34a; margin-bottom: 0.5rem;">{{ followers_count|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Followers</div>
+        </div>
+      </div>
+
+      <!-- Recent Events -->
+      <div style="margin-top: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1A3A52; margin-bottom: 1rem;">Recent Event Posts</h3>
+        {% if event_posts %}
+          <div style="display: grid; gap: 1rem;">
+            {% for post in event_posts %}
+            <div style="background: #f8fafc; border: 1px solid rgba(30, 144, 255, 0.1); border-radius: 8px; padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #1A3A52; margin: 0;">{{ post.title|truncatewords:8 }}</h4>
+                    <span style="padding: 0.25rem 0.75rem; background: #fce7f3; color: #9f1239; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+                      Event
+                    </span>
+                  </div>
+                  <p style="color: #6b7280; font-size: 0.875rem; margin: 0 0 0.75rem 0; line-height: 1.5;">{{ post.content|truncatewords:20|striptags }}</p>
+                  <div style="display: flex; gap: 2rem; color: #6b7280; font-size: 0.875rem;">
+                    <div><strong>Posted:</strong> {{ post.created_at|date:"M d, Y" }}</div>
+                    <div><strong>Views:</strong> {{ post.view_count|default:"0" }}</div>
+                    {% if post.event_date %}
+                    <div><strong>Event Date:</strong> {{ post.event_date|date:"M d, Y" }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 1rem; color: #d1d5db;">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <p style="margin: 0; font-size: 1rem; font-weight: 500;">No event posts found.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Tab -->
+  <div class="tab-content" id="tab-content">
+    <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(30, 144, 255, 0.08); border: 1px solid rgba(30, 144, 255, 0.1);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(30, 144, 255, 0.15);">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1A3A52; margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #1E90FF;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10,9 9,9 8,9"/>
+          </svg>
+          Content Management ({{ total_posts }})
+        </h2>
+      </div>
+      
+      <!-- Content Analytics -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #F0F8FF 0%, #E8F4FF 100%); border: 1px solid rgba(30, 144, 255, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #1E90FF; margin-bottom: 0.5rem;">{{ total_posts|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Posts</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #16a34a; margin-bottom: 0.5rem;">{{ posts_last_30_days|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">This Month</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #d97706; margin-bottom: 0.5rem;">{{ total_views|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Views</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #dc2626; margin-bottom: 0.5rem;">{{ total_likes|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Likes</div>
+        </div>
+      </div>
+
+      <!-- Recent Posts with Analytics -->
+      <div style="margin-top: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1A3A52; margin-bottom: 1rem;">Recent Posts with Analytics</h3>
+        {% if posts_with_analytics %}
+          <div style="display: grid; gap: 1rem;">
+            {% for post in posts_with_analytics %}
+            <div style="background: #f8fafc; border: 1px solid rgba(30, 144, 255, 0.1); border-radius: 8px; padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #1A3A52; margin: 0;">{{ post.title|truncatewords:8 }}</h4>
+                    <span style="padding: 0.25rem 0.75rem; {% if post.post_type == 'general' %}background: #e0f2fe; color: #0369a1;{% elif post.post_type == 'event' %}background: #fce7f3; color: #9f1239;{% elif post.post_type == 'prayer' %}background: #ede9fe; color: #6b21a8;{% else %}background: #dcfce7; color: #15803d;{% endif %} border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+                      {{ post.get_post_type_display }}
+                    </span>
+                  </div>
+                  <p style="color: #6b7280; font-size: 0.875rem; margin: 0 0 0.75rem 0; line-height: 1.5;">{{ post.content|truncatewords:15|striptags }}</p>
+                  <div style="display: flex; gap: 2rem; color: #6b7280; font-size: 0.875rem;">
+                    <div><strong>Views:</strong> {{ post.view_count|default:"0" }}</div>
+                    <div><strong>Likes:</strong> {{ post.likes_count|default:"0" }}</div>
+                    <div><strong>Comments:</strong> {{ post.comments_count|default:"0" }}</div>
+                    <div><strong>Posted:</strong> {{ post.created_at|date:"M d, Y" }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 1rem; color: #d1d5db;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+            <p style="margin: 0; font-size: 1rem; font-weight: 500;">No posts found.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Donations Tab -->
+  <div class="tab-content" id="tab-donations">
+    <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(30, 144, 255, 0.08); border: 1px solid rgba(30, 144, 255, 0.1);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(30, 144, 255, 0.15);">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1A3A52; margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #1E90FF;">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Donations Management ({{ total_donations }})
+        </h2>
+      </div>
+      
+      <!-- Donation Statistics -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #F0F8FF 0%, #E8F4FF 100%); border: 1px solid rgba(30, 144, 255, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #1E90FF; margin-bottom: 0.5rem;">₱{{ total_donation_amount|floatformat:2|default:"0.00" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Donations</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #16a34a; margin-bottom: 0.5rem;">₱{{ this_month_donation_amount|floatformat:2|default:"0.00" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">This Month</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #d97706; margin-bottom: 0.5rem;">{{ total_donations|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Count</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #dc2626; margin-bottom: 0.5rem;">{{ unique_donors|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Unique Donors</div>
+        </div>
+      </div>
+
+      <!-- Recent Donations -->
+      <div style="margin-top: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1A3A52; margin-bottom: 1rem;">Recent Donations</h3>
+        {% if recent_donations %}
+          <div style="display: grid; gap: 1rem;">
+            {% for donation in recent_donations %}
+            <div style="background: #f8fafc; border: 1px solid rgba(30, 144, 255, 0.1); border-radius: 8px; padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #1A3A52; margin: 0;">₱{{ donation.amount|floatformat:2 }}</h4>
+                    <span style="padding: 0.25rem 0.75rem; {% if donation.payment_status == 'completed' %}background: #dcfce7; color: #166534;{% elif donation.payment_status == 'pending' %}background: #fef3c7; color: #92400e;{% else %}background: #fee2e2; color: #991b1b;{% endif %} border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+                      {{ donation.get_payment_status_display }}
+                    </span>
+                  </div>
+                  <div style="display: flex; gap: 2rem; color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                    <div><strong>Donor:</strong> {{ donation.donor.get_full_name|default:donation.donor.username }}</div>
+                    <div><strong>Date:</strong> {{ donation.created_at|date:"M d, Y" }}</div>
+                  </div>
+                  {% if donation.post %}
+                  <p style="color: #6b7280; font-size: 0.875rem; margin: 0;"><strong>For:</strong> {{ donation.post.title|truncatewords:10 }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 1rem; color: #d1d5db;">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            <p style="margin: 0; font-size: 1rem; font-weight: 500;">No donations found.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions Tab -->
+  <div class="tab-content" id="tab-transactions">
+    <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(30, 144, 255, 0.08); border: 1px solid rgba(30, 144, 255, 0.1);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(30, 144, 255, 0.15);">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1A3A52; margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #1E90FF;">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+          Transactions Management ({{ completed_transactions }})
+        </h2>
+      </div>
+      
+      <!-- Transaction Statistics -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #F0F8FF 0%, #E8F4FF 100%); border: 1px solid rgba(30, 144, 255, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #1E90FF; margin-bottom: 0.5rem;">₱{{ total_revenue|floatformat:2|default:"0.00" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Revenue</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #16a34a; margin-bottom: 0.5rem;">₱{{ this_month_revenue|floatformat:2|default:"0.00" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">This Month</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #d97706; margin-bottom: 0.5rem;">{{ completed_transactions|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Completed</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #dc2626; margin-bottom: 0.5rem;">{{ pending_transactions|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Pending</div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div style="margin-top: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1A3A52; margin-bottom: 1rem;">Recent Transactions</h3>
+        {% if recent_transactions %}
+          <div style="display: grid; gap: 1rem;">
+            {% for transaction in recent_transactions %}
+            <div style="background: #f8fafc; border: 1px solid rgba(30, 144, 255, 0.1); border-radius: 8px; padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #1A3A52; margin: 0;">₱{{ transaction.payment_amount|floatformat:2|default:"0.00" }}</h4>
+                    <span style="padding: 0.25rem 0.75rem; {% if transaction.payment_status == 'paid' %}background: #dcfce7; color: #166534;{% elif transaction.payment_status == 'pending' %}background: #fef3c7; color: #92400e;{% else %}background: #fee2e2; color: #991b1b;{% endif %} border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+                      {{ transaction.get_payment_status_display }}
+                    </span>
+                  </div>
+                  <div style="display: flex; gap: 2rem; color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                    <div><strong>Service:</strong> {{ transaction.service.name }}</div>
+                    <div><strong>Client:</strong> {{ transaction.user.get_full_name|default:transaction.user.username }}</div>
+                  </div>
+                  <div style="display: flex; gap: 2rem; color: #6b7280; font-size: 0.875rem;">
+                    <div><strong>Payment Method:</strong> {{ transaction.payment_method|title }}</div>
+                    {% if transaction.payment_date %}
+                    <div><strong>Payment Date:</strong> {{ transaction.payment_date|date:"M d, Y" }}</div>
+                    {% else %}
+                    <div><strong>Booking Date:</strong> {{ transaction.created_at|date:"M d, Y" }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 1rem; color: #d1d5db;">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+            <p style="margin: 0; font-size: 1rem; font-weight: 500;">No transactions found.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Followers Tab -->
+  <div class="tab-content" id="tab-followers">
+    <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(30, 144, 255, 0.08); border: 1px solid rgba(30, 144, 255, 0.1);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(30, 144, 255, 0.15);">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1A3A52; margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #1E90FF;">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Followers Management ({{ followers_count }})
+        </h2>
+      </div>
+      
+      <!-- Follower Statistics -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #F0F8FF 0%, #E8F4FF 100%); border: 1px solid rgba(30, 144, 255, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #1E90FF; margin-bottom: 0.5rem;">{{ followers_count|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Total Followers</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #16a34a; margin-bottom: 0.5rem;">{{ followers_this_week|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">New This Week</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center;">
+          <div style="font-size: 2rem; font-weight: 700; color: #d97706; margin-bottom: 0.5rem;">{{ active_followers|default:"0" }}</div>
+          <div style="font-size: 0.875rem; color: #6b7280; font-weight: 600;">Active Followers</div>
+        </div>
+      </div>
+
+      <!-- Recent Followers -->
+      <div style="margin-top: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1A3A52; margin-bottom: 1rem;">Recent Followers</h3>
+        {% if recent_followers %}
+          <div style="display: grid; gap: 1rem;">
+            {% for follow in recent_followers %}
+            <div style="background: #f8fafc; border: 1px solid rgba(30, 144, 255, 0.1); border-radius: 8px; padding: 1.5rem;">
+              <div style="display: flex; align-items: center; gap: 1.25rem;">
+                {% if follow.user.profile.profile_image %}
+                  <img src="{{ follow.user.profile.profile_image|storage_url }}" alt="{{ follow.user.get_full_name }}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(30, 144, 255, 0.2);">
+                {% else %}
+                  <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #F0F8FF 0%, #E8F4FF 100%); color: #1E90FF; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 700; border: 2px solid rgba(30, 144, 255, 0.2);">
+                    {{ follow.user.get_full_name.0|upper|default:follow.user.username.0|upper }}
+                  </div>
+                {% endif %}
+                <div style="flex: 1;">
+                  <h4 style="font-size: 1.125rem; font-weight: 600; color: #1A3A52; margin: 0 0 0.25rem 0;">
+                    {{ follow.user.get_full_name|default:follow.user.username }}
+                  </h4>
+                  <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">{{ follow.user.email }}</p>
+                </div>
+                <div style="text-align: right;">
+                  <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">Followed</p>
+                  <p style="font-size: 0.875rem; font-weight: 600; color: #6b7280; margin: 0;">{{ follow.followed_at|date:"M d, Y" }}</p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 1rem; color: #d1d5db;">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <p style="margin: 0; font-size: 1rem; font-weight: 500;">No followers yet.</p>
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 

@@ -282,7 +282,10 @@ class ChurchUpdateForm(forms.ModelForm):
         fields = [
             'name', 'description', 'denomination', 'size',
             'email', 'phone', 'website',
-            'address', 'city', 'state', 'country', 'postal_code',
+            # Philippine address structure
+            'region', 'province', 'city_municipality', 'barangay', 'street_address', 'postal_code',
+            # Legacy address fields (for backward compatibility)
+            'address', 'city', 'state', 'country',
             'pastor_name', 'pastor_email', 'pastor_phone',
             'logo', 'cover_image',
             'service_times', 'special_services', 'ministries',
@@ -315,6 +318,28 @@ class ChurchUpdateForm(forms.ModelForm):
                 'class': 'form-input',
                 'placeholder': 'https://www.yourchurch.com'
             }),
+            # Philippine address structure widgets
+            'region': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g., Region X - Northern Mindanao'
+            }),
+            'province': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g., Lanao del Norte'
+            }),
+            'city_municipality': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g., Iligan City'
+            }),
+            'barangay': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g., Barangay Poblacion'
+            }),
+            'street_address': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'Street, Building, Unit No.'
+            }),
+            # Legacy address widgets
             'address': forms.Textarea(attrs={
                 'class': 'form-textarea',
                 'placeholder': 'Enter complete street address',

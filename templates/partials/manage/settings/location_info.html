@@ -14,10 +14,79 @@
     </button>
   </div>
   <div class="settings-grid">
+    {# Philippine Address Structure #}
+    <div class="setting-item">
+      <div class="setting-info">
+        <h4 class="setting-title">Region</h4>
+        <p class="setting-description">Administrative region (e.g., Region X - Northern Mindanao)</p>
+        <div class="setting-status">
+          <span class="status-badge optional">Optional</span>
+          <span class="status-description">Regional administrative division</span>
+        </div>
+      </div>
+      <div class="setting-control">
+        {{ form.region }}
+        {% if form.region.errors %}
+          <div class="form-error">{{ form.region.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-info">
+        <h4 class="setting-title">Province</h4>
+        <p class="setting-description">Province (e.g., Lanao del Norte)</p>
+        <div class="setting-status">
+          <span class="status-badge optional">Optional</span>
+          <span class="status-description">Provincial location</span>
+        </div>
+      </div>
+      <div class="setting-control">
+        {{ form.province }}
+        {% if form.province.errors %}
+          <div class="form-error">{{ form.province.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-info">
+        <h4 class="setting-title">City/Municipality</h4>
+        <p class="setting-description">City or municipality (e.g., Iligan City)</p>
+        <div class="setting-status">
+          <span class="status-badge optional">Optional</span>
+          <span class="status-description">Used for location-based searches</span>
+        </div>
+      </div>
+      <div class="setting-control">
+        {{ form.city_municipality }}
+        {% if form.city_municipality.errors %}
+          <div class="form-error">{{ form.city_municipality.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-info">
+        <h4 class="setting-title">Barangay</h4>
+        <p class="setting-description">Barangay (e.g., Barangay Poblacion)</p>
+        <div class="setting-status">
+          <span class="status-badge optional">Optional</span>
+          <span class="status-description">Local administrative division</span>
+        </div>
+      </div>
+      <div class="setting-control">
+        {{ form.barangay }}
+        {% if form.barangay.errors %}
+          <div class="form-error">{{ form.barangay.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
     <div class="setting-item">
       <div class="setting-info">
         <h4 class="setting-title">Street Address</h4>
-        <p class="setting-description">Full street address of your church</p>
+        <p class="setting-description">Street, building, unit number</p>
         <div class="setting-status">
           <span class="status-badge optional">Optional</span>
           <span class="status-description">Helps people find your church</span>
@@ -33,11 +102,46 @@
 
     <div class="setting-item">
       <div class="setting-info">
-        <h4 class="setting-title">City</h4>
-        <p class="setting-description">City where your church is located</p>
+        <h4 class="setting-title">Postal Code</h4>
+        <p class="setting-description">4-digit postal/ZIP code</p>
         <div class="setting-status">
           <span class="status-badge optional">Optional</span>
-          <span class="status-description">Used for location-based searches</span>
+          <span class="status-description">Postal delivery information</span>
+        </div>
+      </div>
+      <div class="setting-control">
+        {{ form.postal_code }}
+        {% if form.postal_code.errors %}
+          <div class="form-error">{{ form.postal_code.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Legacy Address Fields (for backward compatibility) #}
+    <div class="setting-item">
+      <div class="setting-info">
+        <h4 class="setting-title">Legacy Address</h4>
+        <p class="setting-description">Complete street address (legacy format)</p>
+        <div class="setting-status">
+          <span class="status-badge optional">Optional</span>
+          <span class="status-description">For backward compatibility</span>
+        </div>
+      </div>
+      <div class="setting-control">
+        {{ form.address }}
+        {% if form.address.errors %}
+          <div class="form-error">{{ form.address.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-info">
+        <h4 class="setting-title">Legacy City</h4>
+        <p class="setting-description">City (legacy format)</p>
+        <div class="setting-status">
+          <span class="status-badge optional">Optional</span>
+          <span class="status-description">For backward compatibility</span>
         </div>
       </div>
       <div class="setting-control">
@@ -50,11 +154,11 @@
 
     <div class="setting-item">
       <div class="setting-info">
-        <h4 class="setting-title">State/Province</h4>
-        <p class="setting-description">State or province</p>
+        <h4 class="setting-title">Legacy State/Province</h4>
+        <p class="setting-description">State or province (legacy format)</p>
         <div class="setting-status">
           <span class="status-badge optional">Optional</span>
-          <span class="status-description">Regional location information</span>
+          <span class="status-description">For backward compatibility</span>
         </div>
       </div>
       <div class="setting-control">
