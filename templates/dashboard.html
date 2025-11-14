@@ -483,16 +483,16 @@
     background: rgba(30, 144, 255, 0.1) !important;
   }
 
-  /* Add scroll functionality to sidebar sections */
+  /* Add responsive scroll functionality to sidebar sections */
   .upcoming-events {
-    max-height: 400px !important;
+    max-height: clamp(280px, 25vh, 450px) !important;
     overflow-y: auto !important;
     scrollbar-width: thin !important;
     scrollbar-color: rgba(30, 144, 255, 0.3) transparent !important;
   }
 
   .upcoming-events::-webkit-scrollbar {
-    width: 6px !important;
+    width: clamp(4px, 0.4vw, 8px) !important;
   }
 
   .upcoming-events::-webkit-scrollbar-track {
@@ -501,7 +501,7 @@
 
   .upcoming-events::-webkit-scrollbar-thumb {
     background: rgba(30, 144, 255, 0.3) !important;
-    border-radius: 3px !important;
+    border-radius: clamp(2px, 0.2vw, 4px) !important;
   }
 
   .upcoming-events::-webkit-scrollbar-thumb:hover {
@@ -509,14 +509,14 @@
   }
 
   .following-churches {
-    max-height: 300px !important;
+    max-height: clamp(200px, 20vh, 350px) !important;
     overflow-y: auto !important;
     scrollbar-width: thin !important;
     scrollbar-color: rgba(30, 144, 255, 0.3) transparent !important;
   }
 
   .following-churches::-webkit-scrollbar {
-    width: 6px !important;
+    width: clamp(4px, 0.4vw, 8px) !important;
   }
 
   .following-churches::-webkit-scrollbar-track {
@@ -525,11 +525,32 @@
 
   .following-churches::-webkit-scrollbar-thumb {
     background: rgba(30, 144, 255, 0.3) !important;
-    border-radius: 3px !important;
+    border-radius: clamp(2px, 0.2vw, 4px) !important;
   }
 
   .following-churches::-webkit-scrollbar-thumb:hover {
     background: rgba(30, 144, 255, 0.5) !important;
+  }
+
+  /* Additional responsive adjustments for different screen sizes */
+  @media screen and (max-height: 768px) {
+    .upcoming-events {
+      max-height: clamp(200px, 20vh, 300px) !important;
+    }
+    
+    .following-churches {
+      max-height: clamp(150px, 15vh, 250px) !important;
+    }
+  }
+
+  @media screen and (min-height: 1200px) {
+    .upcoming-events {
+      max-height: clamp(350px, 30vh, 500px) !important;
+    }
+    
+    .following-churches {
+      max-height: clamp(250px, 25vh, 400px) !important;
+    }
   }
 </style>
 {% endblock %}
