@@ -20,6 +20,7 @@ urlpatterns = [
     path('manage-church/<int:church_id>/remove-staff/<int:staff_id>/', views.remove_church_staff, name='remove_church_staff'),
     path('manage-church/<int:church_id>/staff-activities/<int:staff_id>/', views.get_staff_activities, name='get_staff_activities'),
     path('manage-church/<int:church_id>/transactions/export/', views.export_church_transactions_excel, name='export_church_transactions_excel'),
+    path('manage-church/<int:church_id>/donations/export/', views.export_church_donations_excel, name='export_church_donations_excel'),
     path('follow-church/<int:church_id>/', views.follow_church, name='follow_church'),
     path('unfollow-church/<int:church_id>/', views.unfollow_church, name='unfollow_church'),
     path('events/', views.events, name='events'),

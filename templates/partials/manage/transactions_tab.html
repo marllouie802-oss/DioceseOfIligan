@@ -186,37 +186,46 @@
     <!-- Recent Transactions Table -->
     <div class="content-section">
       <div class="section-header">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 16px;">
           <div>
             <h3>Recent Transactions</h3>
             <p>Latest payment transactions from bookings</p>
           </div>
-          <a href="{% url 'core:export_church_transactions_excel' church.id %}" 
-             class="btn btn-primary" 
-             style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #2E86AB; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; transition: background 0.3s; white-space: nowrap;"
-             onmouseover="this.style.background='#1e5f7a'"
-             onmouseout="this.style.background='#2E86AB'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export to Excel
-          </a>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="transactions-search-wrapper" style="display: flex; align-items: center;">
+              <input 
+                type="text" 
+                id="transactions-search-input" 
+                placeholder="Search by Transaction Code or Customer" 
+                style="max-width: 260px; width: 100%; padding: 8px 12px; border-radius: 999px; border: 1px solid #d1d5db; font-size: 0.875rem;"
+              />
+            </div>
+            <a href="{% url 'core:export_church_transactions_excel' church.id %}" 
+               class="btn btn-primary" 
+               style="display: inline-flex; align-items: center; justify-content: center; padding: 8px; background: #16a34a; color: #ffffff; text-decoration: none; border-radius: 6px; border: none; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.35); transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;"
+               onmouseover="this.style.background='#15803d'; this.style.boxShadow='0 3px 6px rgba(22, 163, 74, 0.45)'; this.style.transform='translateY(-1px)'"
+               onmouseout="this.style.background='#16a34a'; this.style.boxShadow='0 2px 4px rgba(22, 163, 74, 0.35)'; this.style.transform='translateY(0)'"
+               title="Export to Excel">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                <path d="M8,12V14H16V12H8M8,16V18H13V16H8Z" fill="currentColor"/>
+                <path d="M16,10L12,6L16,10Z" fill="currentColor"/>
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
-      
       <div class="transactions-table-wrapper">
         <table class="transactions-table">
           <thead>
             <tr>
-              <th>Transaction Code</th>
-              <th>Date</th>
-              <th>Service</th>
-              <th>Customer</th>
-              <th>Payment Method</th>
-              <th>Amount</th>
-              <th>Status</th>
+              <th class="sortable" data-sort-key="code">Transaction Code</th>
+              <th class="sortable" data-sort-key="date">Date</th>
+              <th class="sortable" data-sort-key="service">Service</th>
+              <th class="sortable" data-sort-key="customer">Customer</th>
+              <th class="sortable" data-sort-key="method">Payment Method</th>
+              <th class="sortable" data-sort-key="amount">Amount</th>
+              <th class="sortable" data-sort-key="status">Status</th>
             </tr>
           </thead>
           <tbody>

@@ -1136,6 +1136,258 @@ class ChurchManagementApp {
     this.renderOverviewFollowerGrowthChart();
     this.renderOverviewWeeklyEngagementChart();
     this.renderOverviewRevenueChart();
+    this.initTransactionsTableInteractions();
+    this.initDonationsTableInteractions();
+  }
+
+  /**
+   * Initialize search and sorting for the Recent Transactions table
+   */
+  initTransactionsTableInteractions() {
+    const searchInput = document.getElementById('transactions-search-input');
+    const table = document.querySelector('#transactions .transactions-table');
+    if (!table) {
+      return;
+    }
+
+    const tbody = table.querySelector('tbody');
+    if (!tbody) {
+      return;
+    }
+
+    const rows = Array.from(tbody.querySelectorAll('.transaction-row'));
+    if (!rows.length) {
+      return;
+    }
+
+    // Helper to get cell text based on sort key
+    const getCellValue = (row, key) => {
+      switch (key) {
+        case 'code': {
+          const cell = row.querySelector('.transaction-code');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'date': {
+          const cell = row.querySelector('.transaction-date');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'service': {
+          const cell = row.querySelector('.transaction-service');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'customer': {
+          const cell = row.querySelector('.transaction-customer');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'method': {
+          const cell = row.querySelector('.transaction-method');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'amount': {
+          const cell = row.querySelector('.transaction-amount');
+          if (!cell) return 0;
+          const text = cell.textContent.replace(/[₱,\s]/g, '');
+          const value = parseFloat(text);
+          return isNaN(value) ? 0 : value;
+        }
+        case 'status': {
+          const cell = row.querySelector('.transaction-status');
+          return cell ? cell.textContent.trim() : '';
+        }
+        default:
+          return '';
+      }
+    };
+
+    // Live search by transaction code or customer
+    if (searchInput) {
+      const handleSearch = () => {
+        const query = searchInput.value.toLowerCase().trim();
+        rows.forEach((row) => {
+          const code = getCellValue(row, 'code').toLowerCase();
+          const customer = getCellValue(row, 'customer').toLowerCase();
+          const matches = !query || code.includes(query) || customer.includes(query);
+          row.style.display = matches ? '' : 'none';
+        });
+      };
+
+      searchInput.addEventListener('input', handleSearch);
+    }
+
+    // Sorting
+    const headers = table.querySelectorAll('th.sortable');
+    let currentSortKey = null;
+    let currentSortDirection = 'asc';
+
+    const clearSortIndicators = () => {
+      headers.forEach((th) => {
+        th.classList.remove('sort-asc', 'sort-desc');
+      });
+    };
+
+    const sortRows = (key, direction) => {
+      const sortedRows = [...rows].sort((a, b) => {
+        const aVal = getCellValue(a, key);
+        const bVal = getCellValue(b, key);
+
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+
+        const aStr = (aVal || '').toString().toLowerCase();
+        const bStr = (bVal || '').toString().toLowerCase();
+
+        if (aStr < bStr) return direction === 'asc' ? -1 : 1;
+        if (aStr > bStr) return direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      // Re-append rows in new order
+      sortedRows.forEach((row) => tbody.appendChild(row));
+    };
+
+    headers.forEach((header) => {
+      header.addEventListener('click', () => {
+        const key = header.getAttribute('data-sort-key');
+        if (!key) return;
+
+        if (currentSortKey === key) {
+          currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSortKey = key;
+          currentSortDirection = 'asc';
+        }
+
+        clearSortIndicators();
+        header.classList.add(currentSortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+        sortRows(key, currentSortDirection);
+      });
+    });
+  }
+
+  /**
+   * Initialize search and sorting for the Recent Donations table
+   */
+  initDonationsTableInteractions() {
+    const searchInput = document.getElementById('donations-search-input');
+    const table = document.querySelector('#donations .donations-table');
+    if (!table) {
+      return;
+    }
+
+    const tbody = table.querySelector('tbody');
+    if (!tbody) {
+      return;
+    }
+
+    const rows = Array.from(tbody.querySelectorAll('.donation-row'));
+    if (!rows.length) {
+      return;
+    }
+
+    // Helper to get cell text based on sort key
+    const getCellValue = (row, key) => {
+      switch (key) {
+        case 'donor': {
+          const cell = row.querySelector('.donation-donor');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'amount': {
+          const cell = row.querySelector('.donation-amount');
+          if (!cell) return 0;
+          const text = cell.textContent.replace(/[₱,\s]/g, '');
+          const value = parseFloat(text);
+          return isNaN(value) ? 0 : value;
+        }
+        case 'type': {
+          const cell = row.querySelector('.donation-type');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'method': {
+          const cell = row.querySelector('.donation-method');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'post': {
+          const cell = row.querySelector('.donation-post');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'date': {
+          const cell = row.querySelector('.donation-date');
+          return cell ? cell.textContent.trim() : '';
+        }
+        case 'status': {
+          const cell = row.querySelector('.donation-status');
+          return cell ? cell.textContent.trim() : '';
+        }
+        default:
+          return '';
+      }
+    };
+
+    // Live search by donor name or post content
+    if (searchInput) {
+      const handleSearch = () => {
+        const query = searchInput.value.toLowerCase().trim();
+        rows.forEach((row) => {
+          const donor = getCellValue(row, 'donor').toLowerCase();
+          const post = getCellValue(row, 'post').toLowerCase();
+          const matches = !query || donor.includes(query) || post.includes(query);
+          row.style.display = matches ? '' : 'none';
+        });
+      };
+
+      searchInput.addEventListener('input', handleSearch);
+    }
+
+    // Sorting
+    const headers = table.querySelectorAll('th.sortable');
+    let currentSortKey = null;
+    let currentSortDirection = 'asc';
+
+    const clearSortIndicators = () => {
+      headers.forEach((th) => {
+        th.classList.remove('sort-asc', 'sort-desc');
+      });
+    };
+
+    const sortRows = (key, direction) => {
+      const sortedRows = [...rows].sort((a, b) => {
+        const aVal = getCellValue(a, key);
+        const bVal = getCellValue(b, key);
+
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+
+        const aStr = (aVal || '').toString().toLowerCase();
+        const bStr = (bVal || '').toString().toLowerCase();
+
+        if (aStr < bStr) return direction === 'asc' ? -1 : 1;
+        if (aStr > bStr) return direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      // Re-append rows in new order
+      sortedRows.forEach((row) => tbody.appendChild(row));
+    };
+
+    headers.forEach((header) => {
+      header.addEventListener('click', () => {
+        const key = header.getAttribute('data-sort-key');
+        if (!key) return;
+
+        if (currentSortKey === key) {
+          currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSortKey = key;
+          currentSortDirection = 'asc';
+        }
+
+        clearSortIndicators();
+        header.classList.add(currentSortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+        sortRows(key, currentSortDirection);
+      });
+    });
   }
 
   /**

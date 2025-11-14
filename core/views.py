@@ -1382,6 +1382,212 @@ def export_church_transactions_excel(request, church_id):
 
 
 @login_required
+def export_church_donations_excel(request, church_id):
+    """Export church donations to Excel file."""
+    from django.http import HttpResponse
+    from datetime import datetime
+    import openpyxl
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from openpyxl.utils import get_column_letter
+    
+    # Check permissions (same logic as manage_church)
+    user_role = None
+    staff_position = None
+    
+    try:
+        # Try to get as owner first
+        try:
+            church = request.user.owned_churches.get(id=church_id)
+            user_role = 'owner'
+        except Church.DoesNotExist:
+            # Try to get as staff member
+            staff_position = ChurchStaff.objects.filter(
+                user=request.user,
+                church_id=church_id,
+                status=ChurchStaff.STATUS_ACTIVE
+            ).select_related('church').first()
+            
+            if staff_position:
+                church = staff_position.church
+                user_role = staff_position.role
+            else:
+                raise Church.DoesNotExist
+    except Church.DoesNotExist:
+        messages.error(request, "You don't have permission to export donations for this parish.")
+        return redirect('core:select_church')
+    
+    # Get donations for this church
+    donations_queryset = Donation.objects.filter(
+        post__church=church
+    ).select_related('post', 'donor', 'donor__profile').order_by('-created_at')
+    
+    # Get all donations (not just recent ones)
+    donations = list(donations_queryset)
+    
+    # Create workbook and worksheet
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.title = 'Donations'
+    
+    # Define headers
+    headers = [
+        'Donation ID',
+        'Date',
+        'Donor Name',
+        'Donor Email',
+        'Amount',
+        'Currency',
+        'Payment Method',
+        'Payment Status',
+        'Post Title',
+        'Message',
+        'Is Anonymous',
+        'Transaction ID',
+        'Completed Date'
+    ]
+    
+    # Add headers to worksheet
+    for col, header in enumerate(headers, 1):
+        cell = worksheet.cell(row=1, column=col)
+        cell.value = header
+        cell.font = Font(bold=True, color='FFFFFF')
+        cell.fill = PatternFill(start_color='16A34A', end_color='16A34A', fill_type='solid')
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+        cell.border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+    
+    # Add donation data
+    for row_num, donation in enumerate(donations, 2):
+        # Donation ID
+        worksheet.cell(row=row_num, column=1).value = donation.id
+        
+        # Date (Created Date)
+        if donation.created_at:
+            worksheet.cell(row=row_num, column=2).value = donation.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            worksheet.cell(row=row_num, column=2).value = ''
+        
+        # Donor Name
+        worksheet.cell(row=row_num, column=3).value = donation.get_donor_name()
+        
+        # Donor Email
+        if donation.donor:
+            worksheet.cell(row=row_num, column=4).value = donation.donor.email
+        elif donation.paypal_payer_email:
+            worksheet.cell(row=row_num, column=4).value = donation.paypal_payer_email
+        else:
+            worksheet.cell(row=row_num, column=4).value = ''
+        
+        # Amount
+        worksheet.cell(row=row_num, column=5).value = float(donation.amount)
+        
+        # Currency
+        worksheet.cell(row=row_num, column=6).value = donation.currency
+        
+        # Payment Method
+        payment_method_display = ''
+        if donation.payment_method == 'paypal':
+            payment_method_display = 'PayPal'
+        elif donation.payment_method == 'stripe':
+            payment_method_display = 'Credit Card'
+        elif donation.payment_method == 'gcash':
+            payment_method_display = 'GCash'
+        elif donation.payment_method == 'paymongo':
+            payment_method_display = 'PayMongo'
+        elif donation.payment_method == 'bank':
+            payment_method_display = 'Bank Transfer'
+        worksheet.cell(row=row_num, column=7).value = payment_method_display
+        
+        # Payment Status
+        status_display = ''
+        if donation.payment_status == 'completed':
+            status_display = 'Completed'
+        elif donation.payment_status == 'pending':
+            status_display = 'Pending'
+        elif donation.payment_status == 'failed':
+            status_display = 'Failed'
+        elif donation.payment_status == 'refunded':
+            status_display = 'Refunded'
+        elif donation.payment_status == 'cancelled':
+            status_display = 'Cancelled'
+        else:
+            status_display = donation.get_payment_status_display() or 'Pending'
+        worksheet.cell(row=row_num, column=8).value = status_display
+        
+        # Post Title
+        worksheet.cell(row=row_num, column=9).value = donation.post.content[:100] + '...' if len(donation.post.content) > 100 else donation.post.content
+        
+        # Message
+        worksheet.cell(row=row_num, column=10).value = donation.message or ''
+        
+        # Is Anonymous
+        worksheet.cell(row=row_num, column=11).value = 'Yes' if donation.is_anonymous else 'No'
+        
+        # Transaction ID
+        transaction_id = ''
+        if donation.paypal_transaction_id:
+            transaction_id = donation.paypal_transaction_id
+        elif donation.stripe_charge_id:
+            transaction_id = donation.stripe_charge_id
+        elif donation.paypal_order_id:
+            transaction_id = donation.paypal_order_id
+        elif donation.stripe_payment_intent_id:
+            transaction_id = donation.stripe_payment_intent_id
+        worksheet.cell(row=row_num, column=12).value = transaction_id
+        
+        # Completed Date
+        if donation.completed_at:
+            worksheet.cell(row=row_num, column=13).value = donation.completed_at.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            worksheet.cell(row=row_num, column=13).value = ''
+        
+        # Add borders to all cells in the row
+        for col in range(1, len(headers) + 1):
+            cell = worksheet.cell(row=row_num, column=col)
+            cell.border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            # Alternate row coloring
+            if row_num % 2 == 0:
+                cell.fill = PatternFill(start_color='F8F9FA', end_color='F8F9FA', fill_type='solid')
+    
+    # Auto-adjust column widths
+    for col in range(1, len(headers) + 1):
+        column_letter = get_column_letter(col)
+        max_length = 0
+        column = worksheet[column_letter]
+        
+        for cell in column:
+            try:
+                if cell.value and len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        
+        adjusted_width = min(max_length + 2, 50)  # Cap at 50 characters
+        worksheet.column_dimensions[column_letter].width = adjusted_width
+    
+    # Create HTTP response with Excel file
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f'{church.name.replace(" ", "_")}_Donations_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    # Save workbook to response
+    workbook.save(response)
+    
+    return response
+
+
+@login_required
 def get_church_followers_list(request, church_id):
     """API endpoint to get followers list for adding staff members."""
     try:
