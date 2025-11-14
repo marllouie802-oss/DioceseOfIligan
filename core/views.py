@@ -209,6 +209,14 @@ def _app_context(request):
             ]
         ).count()
     
+    # Check if user has active staff positions for manage church link visibility
+    has_active_staff_positions = False
+    if user.is_authenticated:
+        from core.models import ChurchStaff
+        has_active_staff_positions = user.staff_positions.filter(
+            status=ChurchStaff.STATUS_ACTIVE
+        ).exists()
+    
     return {
         'user_display_name': user_display_name,
         'user_initial': user_initial,
@@ -222,6 +230,7 @@ def _app_context(request):
         'PAYPAL_CURRENCY': PAYPAL_CURRENCY,
         'STRIPE_PUBLISHABLE_KEY': STRIPE_PUBLISHABLE_KEY,
         'unread_booking_notifications': unread_booking_notifications,
+        'has_active_staff_positions': has_active_staff_positions,
     }
 
 def home(request):
