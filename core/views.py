@@ -1196,6 +1196,192 @@ def manage_church(request, church_id=None):
 
 
 @login_required
+def export_church_transactions_excel(request, church_id):
+    """Export church transactions to Excel file."""
+    from django.http import HttpResponse
+    from datetime import datetime
+    import openpyxl
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from openpyxl.utils import get_column_letter
+    
+    # Check permissions (same logic as manage_church)
+    user_role = None
+    staff_position = None
+    
+    try:
+        # Try to get as owner first
+        try:
+            church = request.user.owned_churches.get(id=church_id)
+            user_role = 'owner'
+        except Church.DoesNotExist:
+            # Try to get as staff member
+            staff_position = ChurchStaff.objects.filter(
+                user=request.user,
+                church_id=church_id,
+                status=ChurchStaff.STATUS_ACTIVE
+            ).select_related('church').first()
+            
+            if staff_position:
+                church = staff_position.church
+                user_role = staff_position.role
+            else:
+                raise Church.DoesNotExist
+    except Church.DoesNotExist:
+        messages.error(request, "You don't have permission to export transactions for this parish.")
+        return redirect('core:select_church')
+    
+    # Get transactions (same query as in manage_church)
+    transactions_queryset = Booking.objects.filter(
+        church=church,
+        payment_method__isnull=False  # Only show bookings with payment method (online payment)
+    ).exclude(
+        payment_method=''  # Exclude empty payment methods
+    ).select_related('service', 'service__category', 'user', 'user__profile').order_by('-payment_date', '-created_at')
+    
+    # Get all transactions (not just recent 20)
+    transactions = list(transactions_queryset)
+    
+    # Create workbook and worksheet
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.title = 'Transactions'
+    
+    # Define headers
+    headers = [
+        'Transaction Code',
+        'Date',
+        'Service',
+        'Customer Name',
+        'Customer Email',
+        'Payment Method',
+        'Amount',
+        'Status',
+        'Transaction ID',
+        'Booking Date',
+        'Service Category'
+    ]
+    
+    # Add headers to worksheet
+    for col, header in enumerate(headers, 1):
+        cell = worksheet.cell(row=1, column=col)
+        cell.value = header
+        cell.font = Font(bold=True, color='FFFFFF')
+        cell.fill = PatternFill(start_color='2E86AB', end_color='2E86AB', fill_type='solid')
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+        cell.border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+    
+    # Add transaction data
+    for row_num, transaction in enumerate(transactions, 2):
+        # Transaction Code
+        worksheet.cell(row=row_num, column=1).value = transaction.code
+        
+        # Date (Payment Date)
+        if transaction.payment_date:
+            worksheet.cell(row=row_num, column=2).value = transaction.payment_date.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            worksheet.cell(row=row_num, column=2).value = ''
+        
+        # Service
+        worksheet.cell(row=row_num, column=3).value = transaction.service.name
+        
+        # Customer Name
+        worksheet.cell(row=row_num, column=4).value = transaction.user.get_full_name() or transaction.user.username
+        
+        # Customer Email
+        worksheet.cell(row=row_num, column=5).value = transaction.user.email
+        
+        # Payment Method
+        payment_method_display = ''
+        if transaction.payment_method == 'paypal':
+            payment_method_display = 'PayPal'
+        elif transaction.payment_method == 'stripe':
+            payment_method_display = 'Credit Card'
+        elif transaction.payment_method == 'gcash':
+            payment_method_display = 'GCash'
+        worksheet.cell(row=row_num, column=6).value = payment_method_display
+        
+        # Amount
+        if transaction.payment_amount:
+            worksheet.cell(row=row_num, column=7).value = float(transaction.payment_amount)
+        else:
+            worksheet.cell(row=row_num, column=7).value = 0.00
+        
+        # Status
+        status_display = ''
+        if transaction.payment_status == 'paid':
+            status_display = 'Paid'
+        elif transaction.payment_status == 'pending':
+            status_display = 'Pending'
+        elif transaction.payment_status == 'failed':
+            status_display = 'Failed'
+        elif transaction.payment_status == 'canceled':
+            status_display = 'Canceled'
+        elif transaction.payment_status == 'refunded':
+            status_display = 'Refunded'
+        else:
+            status_display = transaction.get_payment_status_display() or 'Pending'
+        worksheet.cell(row=row_num, column=8).value = status_display
+        
+        # Transaction ID
+        worksheet.cell(row=row_num, column=9).value = transaction.payment_transaction_id or ''
+        
+        # Booking Date
+        if transaction.date:
+            worksheet.cell(row=row_num, column=10).value = transaction.date.strftime('%Y-%m-%d')
+        else:
+            worksheet.cell(row=row_num, column=10).value = ''
+        
+        # Service Category
+        worksheet.cell(row=row_num, column=11).value = transaction.service.category.name if transaction.service.category else 'Uncategorized'
+        
+        # Add borders to all cells in the row
+        for col in range(1, len(headers) + 1):
+            cell = worksheet.cell(row=row_num, column=col)
+            cell.border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            # Alternate row coloring
+            if row_num % 2 == 0:
+                cell.fill = PatternFill(start_color='F8F9FA', end_color='F8F9FA', fill_type='solid')
+    
+    # Auto-adjust column widths
+    for col in range(1, len(headers) + 1):
+        column_letter = get_column_letter(col)
+        max_length = 0
+        column = worksheet[column_letter]
+        
+        for cell in column:
+            try:
+                if cell.value and len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        
+        adjusted_width = min(max_length + 2, 50)  # Cap at 50 characters
+        worksheet.column_dimensions[column_letter].width = adjusted_width
+    
+    # Create HTTP response with Excel file
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f'{church.name.replace(" ", "_")}_Transactions_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    # Save workbook to response
+    workbook.save(response)
+    
+    return response
+
+
+@login_required
 def get_church_followers_list(request, church_id):
     """API endpoint to get followers list for adding staff members."""
     try:
