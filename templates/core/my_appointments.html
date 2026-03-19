@@ -2,510 +2,1437 @@
 {% load static %}
 
 {% block title %}{{ page_title }} - ChurchConnect{% endblock %}
-
 {% block body_class %}page-appointments{% endblock %}
 
 {% block extra_css %}
-  <!-- Blue Sky Theme -->
-  <link rel="stylesheet" href="{% static 'css/variables/blue-sky-vars.css' %}?v={{ STATIC_VERSION }}">
-  <link rel="stylesheet" href="{% static 'css/themes/blue-sky-theme.css' %}?v={{ STATIC_VERSION }}">
-  <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}?v={{ STATIC_VERSION }}">
-  <link rel="stylesheet" href="{% static 'css/components/cards.css' %}?v={{ STATIC_VERSION }}">
-  <link rel="stylesheet" href="{% static 'css/components/forms.css' %}?v={{ STATIC_VERSION }}">
-  <!-- Page-specific styles -->
-  <link rel="stylesheet" href="{% static 'css/pages/appointments.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/variables/blue-sky-vars.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/themes/blue-sky-theme.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/components/buttons.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/components/cards.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/components/forms.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/pages/appointments.css' %}?v={{ STATIC_VERSION }}">
+<style>
+    .time-slots-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+
+    .time-slot-btn {
+        padding: 10px;
+        border: 2px solid #E2E8F0;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+    }
+
+    .time-slot-btn:hover {
+        border-color: #3B82F6;
+        background: #F0F9FF;
+    }
+
+    .time-slot-btn.active {
+        border-color: #3B82F6;
+        background: #3B82F6;
+        color: white;
+    }
+
+    /* Enhanced Date Input Restrictions */
+    .restricted-date-input {
+        position: relative;
+    }
+
+    .restricted-date-input.valid-date {
+        border-color: #10B981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .restricted-date-input.invalid-date {
+        border-color: #EF4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        background-color: #FEF2F2;
+    }
+
+    .restricted-date-input[disabled] {
+        background-color: #F3F4F6;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    /* Date picker styling for WebKit browsers */
+    input[type="date"].restricted-date-input::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        border-radius: 4px;
+        margin-right: 2px;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+
+    input[type="date"].restricted-date-input::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+
+    input[type="date"].restricted-date-input.invalid-date::-webkit-calendar-picker-indicator {
+        background-color: #FEE2E2;
+        border: 1px solid #FCA5A5;
+    }
+
+    input[type="date"].restricted-date-input.valid-date::-webkit-calendar-picker-indicator {
+        background-color: #D1FAE5;
+        border: 1px solid #6EE7B7;
+    }
+
+    .priest-cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+    }
+
+    .priest-card {
+        border: 2px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 15px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 200px;
+    }
+
+    .priest-card:hover {
+        border-color: #3B82F6;
+        background: #F8FAFC;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .priest-card.active {
+        border-color: #3B82F6;
+        background: #EFF6FF;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .priest-card img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 8px;
+        flex-shrink: 0;
+    }
+
+    .priest-name {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 4px;
+        color: #1F2937;
+        word-break: break-word;
+        width: 100%;
+    }
+
+    .priest-title {
+        font-size: 12px;
+        color: #6B7280;
+        margin-bottom: 6px;
+        word-break: break-word;
+        width: 100%;
+    }
+
+    .priest-specializations {
+        font-size: 11px;
+        color: #4B5563;
+        margin-bottom: 8px;
+        line-height: 1.3;
+        word-break: break-word;
+        width: 100%;
+    }
+
+    .priest-availability {
+        font-size: 10px;
+        color: #059669;
+        background: #F0FDF4;
+        padding: 6px 10px;
+        border-radius: 12px;
+        margin-top: auto;
+        display: inline-block;
+        white-space: normal;
+        word-break: break-word;
+        width: 100%;
+        text-align: center;
+        line-height: 1.4;
+    }
+
+    .priest-photo-placeholder {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #E5E7EB;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 8px;
+        font-size: 24px;
+        color: #9CA3AF;
+    }
+
+    /* Review Modal Styles */
+    .star-rating-modal .stars {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin: 10px 0;
+    }
+
+    .star-rating-modal .star {
+        font-size: 32px;
+        color: #D1D5DB;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .star-rating-modal .star:hover {
+        color: #FCD34D;
+    }
+
+    .star-rating-modal .star.filled {
+        color: #FCD34D;
+    }
+
+    .service-name {
+        font-weight: 600;
+        font-size: 16px;
+        color: #1F2937;
+        margin-bottom: 4px;
+    }
+
+    .church-name {
+        font-size: 14px;
+        color: #6B7280;
+    }
+
+    /* Scheduling Modal Styles - Match Booking Modal Theme */
+    .modal-container-wide {
+        max-width: 900px;
+        width: 90%;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-body-split {
+        display: flex;
+        gap: 2rem;
+        padding: 0;
+    }
+
+    .schedule-left-panel, .schedule-right-panel {
+        flex: 1;
+        padding: 2rem;
+    }
+
+    .schedule-left-panel {
+        background: #F9FAFB;
+        border-right: 1px solid #E5E7EB;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .schedule-right-panel {
+        background: white;
+        border-radius: 0 12px 12px 0;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1F2937;
+        margin: 0;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        color: #6B7280;
+        transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+        background: #F3F4F6;
+        color: #1F2937;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #D1D5DB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-hint {
+        font-size: 0.75rem;
+        color: #6B7280;
+        margin-top: 0.25rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #E5E7EB;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: #3B82F6;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #2563EB;
+    }
+
+    .btn-primary:disabled {
+        background: #9CA3AF;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        background: #F3F4F6;
+        color: #374151;
+        border: 1px solid #D1D5DB;
+    }
+
+    .btn-secondary:hover {
+        background: #E5E7EB;
+    }
+
+    .btn-loading {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .modal-body-split {
+            flex-direction: column;
+        }
+        
+        .schedule-left-panel, .schedule-right-panel {
+            padding: 1.5rem;
+        }
+        
+        .schedule-left-panel {
+            border-right: none;
+            border-bottom: 1px solid #E5E7EB;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .schedule-right-panel {
+            border-radius: 0 0 12px 12px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
-  <!-- PayPal SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=PHP"></script>
-  
-  <!-- Stripe SDK -->
-  <script src="https://js.stripe.com/v3/"></script>
-  
-  <!-- Payment Configuration -->
-  <script>
-    window.STRIPE_PUBLISHABLE_KEY = '{{ STRIPE_PUBLISHABLE_KEY }}';
-  </script>
+<script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=PHP"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<script>window.STRIPE_PUBLISHABLE_KEY = '{{ STRIPE_PUBLISHABLE_KEY }}';</script>
 {% endblock %}
 
-{% block sidebar %}
-  {% include 'partials/sidebar.html' %}
-{% endblock %}
-
-{% block topbar %}
-  {% include 'partials/topbar.html' %}
-{% endblock %}
+{% block sidebar %}{% include 'partials/sidebar.html' %}{% endblock %}
+{% block topbar %}{% include 'partials/topbar.html' %}{% endblock %}
 
 {% block content %}
 <div class="appointments-page blue-sky page-container">
-  <div class="page-header">
-    <h1 style="margin:0;">My Appointments</h1>
-    <p class="text-muted">Track your appointment requests. Click on a status to filter.</p>
-  </div>
+    <div class="page-header">
+        <h1 style="margin:0;">My Appointments</h1>
+        <p class="text-muted">Track your appointment requests. Click on a status to filter.</p>
+    </div>
 
-  <!-- Status Filter Pills -->
+    <div class="status-pills">
+        <a class="status-pill {% if status_filter == 'all' %}active{% endif %}"
+            href="{% url 'core:appointments' %}?status=all">All <span class="count">{{ counts.all }}</span></a>
+        <a class="status-pill {% if status_filter == 'requested' %}active{% endif %}"
+            href="{% url 'core:appointments' %}?status=requested">Pending <span class="count">{{ counts.requested
+                }}</span></a>
+        <a class="status-pill {% if status_filter == 'ready_to_schedule' %}active{% endif %}"
+            href="{% url 'core:appointments' %}?status=ready_to_schedule">Ready <span class="count">{{
+                counts.ready_to_schedule }}</span></a>
+        <a class="status-pill {% if status_filter == 'confirmed' %}active{% endif %}"
+            href="{% url 'core:appointments' %}?status=confirmed">Confirmed <span class="count">{{ counts.confirmed
+                }}</span></a>
+        <a class="status-pill {% if status_filter == 'reviewed' %}active{% endif %}"
+            href="{% url 'core:appointments' %}?status=reviewed">Reviewed <span class="count">{{ counts.reviewed
+                }}</span></a>
+        <a class="status-pill {% if status_filter == 'approved' %}active{% endif %}"
+            href="{% url 'core:appointments' %}?status=approved">Approved <span class="count">{{ counts.approved
+                }}</span></a>
+        <a class="status-pill {% if status_filter == 'scheduled' %}active{% endif %}"
+            href="{% url 'core:appointments' %}?status=scheduled">Scheduled <span class="count">{{ counts.scheduled
+                }}</span></a>
+        <a class="status-pill {% if status_filter == 'completed' %}active{% endif %}"
+            href="{% url 'core:appointments' %}?status=completed">Done <span class="count">{{ counts.completed
+                }}</span></a>
+    </div>
 
-  <div class="status-pills">
-    <a class="status-pill {% if status_filter == 'all' %}active{% endif %}" href="{% url 'core:appointments' %}?status=all">All <span class="count">{{ counts.all }}</span></a>
-    <a class="status-pill {% if status_filter == 'requested' %}active{% endif %}" href="{% url 'core:appointments' %}?status=requested">Pending <span class="count">{{ counts.requested }}</span></a>
-    <a class="status-pill {% if status_filter == 'reviewed' %}active{% endif %}" href="{% url 'core:appointments' %}?status=reviewed">Reviewed <span class="count">{{ counts.reviewed }}</span></a>
-    <a class="status-pill {% if status_filter == 'approved' %}active{% endif %}" href="{% url 'core:appointments' %}?status=approved">Approved <span class="count">{{ counts.approved }}</span></a>
-    <a class="status-pill {% if status_filter == 'completed' %}active{% endif %}" href="{% url 'core:appointments' %}?status=completed">Completed <span class="count">{{ counts.completed }}</span></a>
-  </div>
-
-  {% if bookings %}
+    {% if bookings %}
     <div class="appointments-table-container">
-      <table class="appointments-table">
-        <thead>
-          <tr>
-            <th>Service</th>
-            <th>Church</th>
-            <th>Appointment ID</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Requested</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for b in bookings %}
-            <tr class="appointment-row">
-              <td class="service-cell">
-                <div class="service-name">{{ b.service.name }}</div>
-              </td>
-              <td class="church-cell">
-                <div class="church-info">
-                  <i data-feather="map-pin"></i>
-                  <span>{{ b.church.name }}</span>
-                </div>
-              </td>
-              <td class="id-cell">
-                <span class="appointment-id">{{ b.code }}</span>
-              </td>
-              <td class="date-cell">
-                <div class="date-info">
-                  <i data-feather="calendar"></i>
-                  <span>{{ b.date|date:'M j, Y' }}</span>
-                </div>
-              </td>
-              <td class="time-cell">
-                <div class="time-info">
-                  <i data-feather="clock"></i>
-                  <span>{% if b.start_time %}{{ b.start_time|time:'g:i A' }}{% if b.end_time %} - {{ b.end_time|time:'g:i A' }}{% endif %}{% else %}Not set{% endif %}</span>
-                </div>
-              </td>
-              <td class="requested-cell">
-                {{ b.created_at|date:'M j, Y' }}
-              </td>
-              <td class="status-cell">
-                <span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span>
-                {% if b.status == 'declined' and b.decline_reason %}
-                  <div class="decline-reason-tooltip" title="{{ b.decline_reason }}">
-                    <i data-feather="alert-circle"></i>
-                  </div>
-                {% endif %}
-              </td>
-              <td class="actions-cell">
-                <div class="action-buttons">
-                  <button class="booking-icon-btn" onclick="openAppointmentSummary(
-                    {{ b.id }}, 
-                    '{{ b.code }}',
-                    '{{ b.service.name|escapejs }}',
-                    '{{ b.church.name|escapejs }}',
-                    '{{ b.church.full_address|escapejs }}',
-                    '{{ b.church.email|default:''|escapejs }}',
-                    '{{ b.church.phone|default:''|escapejs }}',
-                    '{{ b.church.paypal_email|default:''|escapejs }}',
-                    '{{ b.date|date:'F j, Y' }}',
-                    '{% if b.start_time %}{{ b.start_time|time:'g:i A' }}{% if b.end_time %} - {{ b.end_time|time:'g:i A' }}{% endif %}{% else %}Not set{% endif %}',
-                    '{{ b.get_status_display }}',
-                    '{{ b.status }}',
-                    '{{ b.created_at|date:'F j, Y' }}',
-                    '{{ b.updated_at|date:'F j, Y' }}',
-                    '{{ b.user.get_full_name|default:b.user.profile.display_name|default:b.user.username|escapejs }}',
-                    '{{ b.user.email|escapejs }}',
-                    '{{ b.user.profile.phone|default:''|escapejs }}',
-                    '{% filter escapejs %}{% if b.user.profile.street_address %}{{ b.user.profile.street_address }}, {% endif %}{% if b.user.profile.barangay %}{{ b.user.profile.barangay }}, {% endif %}{% if b.user.profile.city_municipality %}{{ b.user.profile.city_municipality }}, {% endif %}{% if b.user.profile.province %}{{ b.user.profile.province }} {% endif %}{% if b.user.profile.postal_code %}{{ b.user.profile.postal_code }}{% endif %}{% endfilter %}',
-                    '{{ b.notes|escapejs }}',
-                    {{ b.service.price|default:'0' }},
-                    {{ b.service.is_free|yesno:'true,false' }},
-                    '{{ b.payment_status }}',
-                    {{ b.payment_amount|default:'0' }},
-                    '{{ b.get_payment_method_display|default:''|escapejs }}',
-                    '{% if b.payment_date %}{{ b.payment_date|date:'M j, Y g:i A' }}{% endif %}',
-                    '{{ b.payment_transaction_id|default:''|escapejs }}',
-                    '{{ b.service.category.name|default:''|escapejs }}',
-                    '{{ b.service.category.icon|default:''|escapejs }}',
-                    '{{ b.service.category.color|default:'' }}',
-                    '{{ b.decline_reason|default:''|escapejs }}',
-                    '{% if b.handled_by %}{{ b.handled_by.get_full_name|default:b.handled_by.username|escapejs }}{% elif b.church.owner %}{{ b.church.owner.get_full_name|default:b.church.owner.username|escapejs }}{% else %}Parish Administrator{% endif %}'
-                  )" title="View Summary">
-                    <i data-feather="eye"></i>
-                  </button>
-                  
-                  {% if b.status == 'pending' or b.status == 'requested' %}
-                    <button class="booking-icon-btn btn-danger" onclick="confirmCancelBooking({{ b.id }}, '{{ b.code }}', '{{ b.service.name|escapejs }}')" title="Cancel Booking">
-                      <i data-feather="x-circle"></i>
-                    </button>
-                  {% endif %}
-                  
-                  {% if b.status == 'completed' %}
-                    {% if b.user_has_reviewed %}
-                      <a href="{% url 'core:service_reviews' b.service.id %}" class="booking-icon-btn" title="Check Review">
-                        <i data-feather="check-circle"></i>
-                      </a>
-                    {% else %}
-                      <button class="booking-icon-btn" onclick="openReviewModal({{ b.service.id }}, '{{ b.service.name|escapejs }}', '{{ b.church.name|escapejs }}', {{ b.id }})" title="Rate & Review">
-                        <i data-feather="star"></i>
-                      </button>
-                    {% endif %}
-                  {% endif %}
-                </div>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+        <table class="appointments-table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Church</th>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Requested</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bookings %}
+                <tr class="appointment-row">
+                    <td>{{ b.service.name }}</td>
+                    <td>{{ b.church.name }}</td>
+                    <td>{{ b.code }}</td>
+                    <td>{{ b.date|date:'M j, Y' }}</td>
+                    <td>{% if b.start_time %}{{ b.start_time|time:'g:i A' }}{% if b.end_time %} - {{ b.end_time|time:'g:i A' }}{% endif %}{% else %}Not set{% endif %}</td>
+                    <td>{{ b.created_at|date:'M j, Y' }}</td>
+                    <td><span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span></td>
+                    <td class="actions-cell">
+                        <div class="action-buttons">
+                            <button class="booking-icon-btn" onclick="openAppointmentSummary({
+                                id: {{ b.id }},
+                                code: '{{ b.code }}',
+                                serviceName: '{{ b.service.name|escapejs }}',
+                                churchName: '{{ b.church.name|escapejs }}',
+                                date: '{{ b.date|date:'F j, Y' }}',
+                                status: '{{ b.status }}'
+                              })" title="View Summary"><i data-feather="eye"></i></button>
+
+                            {% if b.status == 'ready_to_schedule' or b.status == 'confirmed' or b.status == 'reschedule' or b.status == 'approved' %}
+                            <button class="booking-icon-btn btn-primary"
+                                onclick="openScheduleModal({{ b.id }}, '{{ b.code }}', '{{ b.service.name|escapejs }}')"
+                                title="Schedule Date"><i data-feather="calendar"></i></button>
+                            {% endif %}
+
+                            {% if b.status == 'interview_completed' %}
+                            <button class="booking-icon-btn btn-primary"
+                                onclick="openEventScheduleModal({{ b.id }}, '{{ b.code }}', '{{ b.service.name|escapejs }}')"
+                                title="Schedule Event"><i data-feather="star"></i></button>
+                            {% endif %}
+
+                            {% if b.status == 'pending' or b.status == 'requested' %}
+                            <button class="booking-icon-btn btn-danger"
+                                onclick="confirmCancelBooking({{ b.id }}, '{{ b.code }}', '{{ b.service.name|escapejs }}')"
+                                title="Cancel"><i data-feather="x-circle"></i></button>
+                            {% endif %}
+
+                            {% if b.status == 'completed' and not b.user_has_reviewed %}
+                            <button class="booking-icon-btn"
+                                onclick="openReviewModal({{ b.service.id }}, '{{ b.service.name|escapejs }}', '{{ b.church.name|escapejs }}', {{ b.id }})"
+                                title="Review"><i data-feather="star"></i></button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-  {% else %}
+    {% else %}
     <div class="empty-state">
-      <h3>No appointments yet</h3>
-      <p>Request an appointment from a church page to get started.</p>
+        <h3>No appointments yet</h3>
+        <p>Request an appointment from a church page to get started.</p>
     </div>
-  {% endif %}
+    {% endif %}
 </div>
 
-<!-- Appointment Summary Modal -->
+<!-- Simplified Summary Modal -->
 <div id="appointmentSummaryModal" class="modal-overlay" style="display: none;">
-  <div class="modal-container appointment-summary-modal">
-    <!-- Modal Header -->
-    <div class="modal-header">
-      <button class="modal-close-btn" onclick="closeAppointmentSummary()">&times;</button>
+    <div class="modal-container appointment-summary-modal">
+        <div class="modal-header"><button class="modal-close-btn" onclick="closeAppointmentSummary()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <h1 class="invoice-title">APPOINTMENT CONFIRMATION</h1>
+            <p>ID: <span id="summary-code"></span></p>
+            <p>Church: <span id="summary-church"></span></p>
+            <p>Requester: <span id="summary-user-name"></span></p>
+            <p>Service: <span id="summary-service"></span></p>
+            <p>Date: <span id="summary-date"></span></p>
+            <p>Time: <span id="summary-time"></span></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="printAppointmentSummary()">Print</button>
+            <button class="btn btn-outline" onclick="closeAppointmentSummary()">Close</button>
+        </div>
     </div>
-    
-    <!-- Modal Body -->
-    <div class="modal-body" style="position: relative !important;">
-      <!-- Watermark Logo (Print Only) -->
-      <div class="watermark-logo print-only" style="position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 550px !important; height: 550px !important; z-index: 0 !important; pointer-events: none !important; opacity: 0.12 !important;">
-        <img src="{% static 'images/logo.png' %}" alt="Diocese of Iligan Watermark" style="width: 100% !important; height: 100% !important; object-fit: contain !important;">
-      </div>
-      
-      <!-- Invoice Header -->
-      <div class="invoice-header">
-        <div class="invoice-title-section">
-          <h1 class="invoice-title">APPOINTMENT CONFIRMATION</h1>
-          <div class="invoice-number">
-            <span class="label">Appointment No:</span>
-            <span class="value" id="summary-code"></span>
-          </div>
-          <div class="invoice-status">
-            <span id="summary-status-badge" class="badge"></span>
-          </div>
-        </div>
-        <div class="invoice-dates">
-          <div class="date-item">
-            <span class="label">Issued:</span>
-            <span class="value" id="summary-created"></span>
-          </div>
-          <div class="date-item">
-            <span class="label">Last Updated:</span>
-            <span class="value" id="summary-updated"></span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Parties Section -->
-      <div class="invoice-parties">
-        <div class="party-box">
-          <h3 class="party-title">CHURCH INFORMATION</h3>
-          <div class="party-name" id="summary-church"></div>
-          <div class="party-detail" id="summary-church-address"></div>
-          <div class="party-detail" id="summary-church-email"></div>
-          <div class="party-detail" id="summary-church-phone"></div>
-        </div>
-        <div class="party-box">
-          <h3 class="party-title">REQUESTER INFORMATION</h3>
-          <div class="party-name" id="summary-user-name"></div>
-          <div class="party-detail" id="summary-user-email"></div>
-          <div class="party-detail" id="summary-user-phone"></div>
-          <div class="party-detail" id="summary-user-address"></div>
-        </div>
-      </div>
-      
-      <!-- Service Details -->
-      <div class="invoice-details">
-        <h3 class="section-title">APPOINTMENT DETAILS</h3>
-        <table class="details-table">
-          <tr>
-            <td class="detail-label">Service Type:</td>
-            <td class="detail-value" id="summary-service"></td>
-          </tr>
-          <tr id="summary-category-row" style="display: none;">
-            <td class="detail-label">Category:</td>
-            <td class="detail-value">
-              <span id="summary-category-badge" style="display: none; align-items: center; gap: 0.25rem; padding: 0.125rem 0.5rem; background-color: #3B82F620; color: #3B82F6; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #3B82F640;">
-                <span id="summary-category-icon">📁</span>
-                <span id="summary-category-name">Category</span>
-              </span>
-            </td>
-          </tr>
-          <tr>
-            <td class="detail-label">Appointment Date:</td>
-            <td class="detail-value" id="summary-date"></td>
-          </tr>
-          <tr>
-            <td class="detail-label">Appointment Time:</td>
-            <td class="detail-value" id="summary-time"></td>
-          </tr>
-        </table>
-      </div>
-      
-      <!-- Payment Information Section -->
-      <div class="invoice-details" id="summary-payment-info-section">
-        <h3 class="section-title">PAYMENT INFORMATION</h3>
-        <table class="details-table">
-          <tr>
-            <td class="detail-label">Payment Status:</td>
-            <td class="detail-value" id="summary-payment-status"></td>
-          </tr>
-          <tr>
-            <td class="detail-label">Amount:</td>
-            <td class="detail-value" id="summary-payment-amount"></td>
-          </tr>
-          <tr id="summary-payment-method-row" style="display: none;">
-            <td class="detail-label">Payment Method:</td>
-            <td class="detail-value" id="summary-payment-method"></td>
-          </tr>
-          <tr id="summary-payment-date-row" style="display: none;">
-            <td class="detail-label">Payment Date:</td>
-            <td class="detail-value" id="summary-payment-date"></td>
-          </tr>
-          <tr id="summary-payment-transaction-row" style="display: none;">
-            <td class="detail-label">Transaction ID:</td>
-            <td class="detail-value" id="summary-payment-transaction" style="font-family: monospace; font-size: 12px;"></td>
-          </tr>
-        </table>
-      </div>
-      
-      <!-- Notes Section -->
-      <div class="invoice-notes" id="summary-notes-section" style="display: none;">
-        <h3 class="section-title">ADDITIONAL NOTES</h3>
-        <p class="notes-content" id="summary-notes"></p>
-      </div>
-      
-      <!-- Decline Reason Section -->
-      <div class="invoice-notes" id="summary-decline-reason-section" style="display: none;">
-        <h3 class="section-title" style="color: #dc2626;">DECLINE REASON</h3>
-        <div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: #fef2f2; border-left: 4px solid #dc2626; border-radius: 4px;">
-          <i data-feather="alert-circle" style="color: #dc2626; flex-shrink: 0; margin-top: 2px;"></i>
-          <p class="notes-content" id="summary-decline-reason" style="color: #991b1b; margin: 0;"></p>
-        </div>
-      </div>
-      
-      <!-- Signature Section (Print Only) -->
-      <div class="signature-section print-only" style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #e5e7eb; page-break-inside: avoid;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: flex-end;">
-          <div style="text-align: center;">
-            <div style="border-bottom: 2px solid #000; height: 35px; margin-bottom: 5px;"></div>
-            <div style="font-size: 9px; color: #374151; font-weight: 600;" id="summary-handler-name">
-              Parish Administrator
-            </div>
-          </div>
-          
-          <div style="text-align: center;">
-            <div style="border-bottom: 2px solid #000; height: 35px; margin-bottom: 5px;"></div>
-            <div style="font-size: 9px; color: #374151; font-weight: 600;">
-              Date
-            </div>
-          </div>
-          
-          <div style="text-align: center;">
-            <div style="border: 2px solid #000; height: 50px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #9ca3af; background: #fafafa;">
-              Parish Seal
-            </div>
-            <div style="font-size: 9px; color: #374151; font-weight: 600;">
-              Official Church Stamp
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Footer Note (Print Only) -->
-      <div class="invoice-footer-note print-only" style="margin-top: 12px;">
-        <p style="margin: 1px 0; font-size: 8px;">This is an automated appointment confirmation. Please keep this for your records.</p>
-        <p style="margin: 1px 0; font-size: 8px;">For any inquiries, please contact the church directly using the information provided above.</p>
-      </div>
-      
-      <!-- Payment Method Section -->
-      <div class="invoice-payment" id="summary-payment-section" style="display: none;">
-        <h3 class="section-title">PAYMENT METHOD</h3>
-        <p class="payment-subtitle">Select your preferred payment method to proceed</p>
-        
-        <div class="payment-method-tabs">
-          <button type="button" class="payment-tab-btn active" data-method="paypal" onclick="switchPaymentTab('paypal')" title="PayPal">
-            <svg class="payment-logo" viewBox="0 0 124 33" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#003087" d="M46.211 6.749h-6.839a.95.95 0 0 0-.939.802l-2.766 17.537a.57.57 0 0 0 .564.658h3.265a.95.95 0 0 0 .939-.803l.746-4.73a.95.95 0 0 1 .938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415-.972-1.142-2.696-1.746-4.985-1.746zM47 13.154c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583a.57.57 0 0 1 .563-.481h.473c1.235 0 2.4 0 3.002.704.359.42.469 1.044.332 1.906zM66.654 13.075h-3.275a.57.57 0 0 0-.563.481l-.145.916-.229-.332c-.709-1.029-2.29-1.373-3.868-1.373-3.619 0-6.71 2.741-7.312 6.586-.313 1.918.132 3.752 1.22 5.031.998 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .562.66h2.95a.95.95 0 0 0 .939-.803l1.77-11.209a.568.568 0 0 0-.561-.658zm-4.565 6.374c-.316 1.871-1.801 3.127-3.695 3.127-.951 0-1.711-.305-2.199-.883-.484-.574-.668-1.391-.514-2.301.295-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.499.589.697 1.411.554 2.317zM84.096 13.075h-3.291a.954.954 0 0 0-.787.417l-4.539 6.686-1.924-6.425a.953.953 0 0 0-.912-.678h-3.234a.57.57 0 0 0-.541.754l3.625 10.638-3.408 4.811a.57.57 0 0 0 .465.9h3.287a.949.949 0 0 0 .781-.408l10.946-15.8a.57.57 0 0 0-.468-.895z"/>
-              <path fill="#009cde" d="M94.992 6.749h-6.84a.95.95 0 0 0-.938.802l-2.766 17.537a.569.569 0 0 0 .562.658h3.51a.665.665 0 0 0 .656-.562l.785-4.971a.95.95 0 0 1 .938-.803h2.164c4.506 0 7.105-2.18 7.785-6.5.307-1.89.012-3.375-.873-4.415-.971-1.142-2.694-1.746-4.983-1.746zm.789 6.405c-.373 2.454-2.248 2.454-4.062 2.454h-1.031l.725-4.583a.568.568 0 0 1 .562-.481h.473c1.234 0 2.4 0 3.002.704.359.42.468 1.044.331 1.906zM115.434 13.075h-3.273a.567.567 0 0 0-.562.481l-.145.916-.23-.332c-.709-1.029-2.289-1.373-3.867-1.373-3.619 0-6.709 2.741-7.311 6.586-.312 1.918.131 3.752 1.219 5.031 1 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .564.66h2.949a.95.95 0 0 0 .938-.803l1.771-11.209a.571.571 0 0 0-.565-.658zm-4.565 6.374c-.314 1.871-1.801 3.127-3.695 3.127-.949 0-1.711-.305-2.199-.883-.484-.574-.666-1.391-.514-2.301.297-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.501.589.699 1.411.554 2.317z"/>
-              <path fill="#003087" d="M119.295 7.23l-2.807 17.858a.569.569 0 0 0 .562.658h2.822c.469 0 .867-.34.939-.803l2.768-17.536a.57.57 0 0 0-.562-.659h-3.16a.571.571 0 0 0-.562.482z"/>
-            </svg>
-          </button>
-          <button type="button" class="payment-tab-btn" data-method="stripe" onclick="switchPaymentTab('stripe')" title="Credit Card">
-            <div class="card-logos">
-              <svg class="card-logo" viewBox="0 0 48 32" xmlns="http://www.w3.org/2000/svg">
-                <rect fill="#EB001B" width="48" height="32" rx="4"/>
-                <circle fill="#FF5F00" cx="24" cy="16" r="10"/>
-                <circle fill="#F79E1B" cx="32" cy="16" r="10"/>
-              </svg>
-              <svg class="card-logo" viewBox="0 0 48 32" xmlns="http://www.w3.org/2000/svg">
-                <rect fill="#0066B2" width="48" height="32" rx="4"/>
-                <path fill="#FCD116" d="M18 11h12v10H18z"/>
-                <path fill="#0066B2" d="M19 16l5-5v10l-5-5z"/>
-                <path fill="#FCD116" d="M29 16l-5-5v10l5-5z"/>
-              </svg>
-            </div>
-          </button>
+</div>
+
+<!-- Simplified Schedule Modals -->
+<div id="scheduleModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container modal-container-wide">
+        <div class="modal-header">
+            <h3 class="modal-title">Select Priest & Schedule</h3>
+            <button type="button" class="modal-close" id="closeScheduleModal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
         </div>
         
-        <!-- PayPal Payment Section -->
-        <div id="paypal-booking-section" class="booking-payment-section active">
-          <div id="paypal-booking-button" class="paypal-button-container"></div>
-          <div class="payment-note">
-            <i data-feather="info"></i>
-            <p>You'll be redirected to PayPal to complete your payment securely.</p>
-          </div>
+        <div class="modal-body modal-body-split">
+            <!-- Left Column: Priest Selection -->
+            <div class="schedule-left-panel">
+                <div class="priest-selection-section">
+                    <h4 style="font-size: 1rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem;">Available Priests</h4>
+                    <p style="font-size: 0.875rem; color: #6B7280; margin-bottom: 1.5rem; line-height: 1.5;">
+                        Select a priest to view their available dates and time slots.
+                    </p>
+                    
+                    <div id="priests-container" class="priest-cards-container">
+                        <!-- Priest cards will be dynamically loaded -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Scheduling Form -->
+            <div class="schedule-right-panel">
+                <form id="scheduleForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="booking_id" id="schedule-booking-id">
+                    <input type="hidden" name="pastor" id="schedule-pastor-id" required>
+                    
+                    <div class="simple-schedule-form">
+                        <div class="form-section">
+                            <h3 style="font-size: 1.125rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem;">Schedule Appointment</h3>
+                            <p style="font-size: 0.875rem; color: #6B7280; margin-bottom: 1.5rem; line-height: 1.5;">
+                                Choose your preferred date and time for the appointment with the selected priest.
+                            </p>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="schedule-date">Preferred Date</label>
+                                <input type="date" name="date" id="schedule-date" class="form-input" required>
+                                <div class="form-hint" id="date-help-text">Select a priest first to see available dates</div>
+                            </div>
+
+                            <div class="form-group" id="time-selection-container" style="display: none;">
+                                <label class="form-label" for="schedule-time">Preferred Time</label>
+                                <div id="time-slots-container" class="time-slots-container">
+                                    <!-- Time slots will be dynamically loaded -->
+                                </div>
+                                <input type="hidden" name="start_time" id="schedule-start-time" required>
+                                <input type="hidden" name="time" id="schedule-time" required>
+                                <input type="hidden" name="time_slot" id="schedule-time-slot">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="schedule-notes">Additional Notes (Optional)</label>
+                                <textarea name="notes" id="schedule-notes" class="form-textarea" rows="4"
+                                          placeholder="Any special requests or information for the priest..."></textarea>
+                                <div class="form-hint">Let the priest know if you have any specific requirements or questions.</div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeScheduleModal()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submit-schedule-btn" disabled>
+                                <span class="btn-text">
+                                    <i data-feather="calendar"></i>
+                                    Schedule Appointment
+                                </span>
+                                <span class="btn-loading" style="display: none;">
+                                    <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Processing...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-        
-        <!-- Stripe Payment Section -->
-        <div id="stripe-booking-section" class="booking-payment-section" style="display: none;">
-          <div id="stripe-booking-card" class="stripe-card-element"></div>
-          <div id="stripe-booking-errors" class="error-message" style="display: none;"></div>
-          <button type="button" id="stripe-booking-btn" class="btn btn-primary btn-block">
-            <span>Pay Now</span>
-          </button>
-          <div class="payment-note">
-            <i data-feather="shield"></i>
-            <p>Your payment is secured by Stripe. We never store your card details.</p>
-          </div>
-        </div>
-        
-        <div id="booking-payment-error" class="error-message" style="display: none;"></div>
-      </div>
-      
-      <!-- Footer Note -->
-      <div class="invoice-footer-note">
-        <p>This is an automated appointment confirmation. Please keep this for your records.</p>
-        <p>For any inquiries, please contact the church directly using the information provided above.</p>
-      </div>
     </div>
-    
-    <!-- Modal Footer -->
-    <div class="modal-footer" id="summary-footer" style="display: flex; gap: 12px;">
-      <button type="button" id="cancel-booking-btn" class="btn btn-danger" onclick="confirmCancelBookingFromSummary()" style="flex: 1; display: none;">
-        <i data-feather="x-circle" style="width: 16px; height: 16px; margin-right: 8px;"></i>
-        Cancel Booking
-      </button>
-      <button type="button" id="print-summary-btn" class="btn btn-primary" onclick="printAppointmentSummary()" style="flex: 1;">
-        <i data-feather="printer" style="width: 16px; height: 16px; margin-right: 8px;"></i>
-        Print
-      </button>
-      <button type="button" class="btn btn-outline" onclick="closeAppointmentSummary()" style="flex: 1;">Close</button>
+</div>
+
+<div id="eventScheduleModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container modal-container-wide">
+        <div class="modal-header">
+            <h3 class="modal-title">Schedule Event</h3>
+            <button type="button" class="modal-close" id="closeEventScheduleModal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="modal-body modal-body-split">
+            <!-- Left Column: Event Information -->
+            <div class="schedule-left-panel">
+                <div class="event-info-section">
+                    <h4 style="font-size: 1rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem;">Event Details</h4>
+                    <p style="font-size: 0.875rem; color: #6B7280; margin-bottom: 1.5rem; line-height: 1.5;">
+                        Schedule your event date and time. The assigned priest will need time to prepare for your event.
+                    </p>
+                    
+                    <div class="event-requirements" id="event-requirements" style="display: none; margin-top: 1.5rem;">
+                        <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                            <i data-feather="check-circle" style="width: 16px; height: 16px;"></i>
+                            Event Requirements
+                        </h4>
+                        <ul id="event-requirements-list" style="margin: 0; padding-left: 1.25rem; color: #9CA3AF; font-size: 0.875rem; line-height: 1.5;">
+                            <!-- Event requirements will be populated by JavaScript -->
+                        </ul>
+                    </div>
+                    
+                    <div class="event-preparation" id="event-preparation" style="display: none; margin-top: 1.5rem;">
+                        <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                            <i data-feather="clipboard" style="width: 16px; height: 16px;"></i>
+                            Preparation Notes
+                        </h4>
+                        <p id="event-preparation-notes" style="margin: 0; color: #9CA3AF; font-size: 0.875rem; line-height: 1.5;">
+                            <!-- Event preparation notes will be populated by JavaScript -->
+                        </p>
+                    </div>
+                    
+                    <!-- Priest Information -->
+                    <div class="priest-info-section" id="event-priest-info" style="margin-top: 1.5rem;">
+                        <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                            <i data-feather="user" style="width: 16px; height: 16px;"></i>
+                            Assigned Priest
+                        </h4>
+                        <div id="event-priest-details" style="display: flex; align-items: center; gap: 1rem;">
+                            <div id="event-priest-photo" class="priest-photo-container" style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background-color: #F3F4F6; display: flex; align-items: center; justify-content: center;">
+                                <i data-feather="user" style="width: 24px; height: 24px; color: #9CA3AF;"></i>
+                            </div>
+                            <div id="event-priest-info" style="flex: 1;">
+                                <p id="event-priest-name" style="margin: 0; font-weight: 600; color: #1F2937; font-size: 0.875rem;">Loading priest information...</p>
+                                <p id="event-priest-title" style="margin: 0.25rem 0 0 0; color: #6B7280; font-size: 0.75rem;">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Information -->
+                    <div class="service-info-section" id="event-service-info" style="margin-top: 1.5rem;">
+                        <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                            <i data-feather="calendar" style="width: 16px; height: 16px;"></i>
+                            Service Information
+                        </h4>
+                        <div id="event-service-details">
+                            <div id="event-service-photo" class="service-photo-container" style="width: 100%; height: 120px; border-radius: 8px; overflow: hidden; background-color: #F3F4F6; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                <i data-feather="image" style="width: 32px; height: 32px; color: #9CA3AF;"></i>
+                            </div>
+                            <h5 id="event-service-name" style="margin: 0 0 0.5rem 0; font-weight: 600; color: #1F2937; font-size: 0.875rem;">Loading service information...</h5>
+                            <p id="event-service-description" style="margin: 0; color: #6B7280; font-size: 0.75rem; line-height: 1.5;">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Event Scheduling Form -->
+            <div class="schedule-right-panel">
+                <form id="eventScheduleForm" method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="booking_id" id="event-booking-id">
+                    
+                    <div class="simple-schedule-form">
+                        <div class="form-section">
+                            <h3 style="font-size: 1.125rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem;">Schedule Event</h3>
+                            <p style="font-size: 0.875rem; color: #6B7280; margin-bottom: 1.5rem; line-height: 1.5;">
+                                Choose your preferred date and time for the event. Consider preparation requirements.
+                            </p>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="event-date-input">Event Date</label>
+                                <input type="date" name="event_date" id="event-date-input" class="form-input" required>
+                                <div class="form-hint" id="event-date-help-text">Select your preferred event date</div>
+                            </div>
+
+                            <div class="form-group" id="event-time-selection-container" style="display: none;">
+                                <label class="form-label" for="event-time-input">Event Time</label>
+                                <div id="event-time-slots-container" class="time-slots-container">
+                                    <!-- Time slots will be dynamically loaded -->
+                                </div>
+                                <input type="hidden" name="event_time" id="event-time-input" required>
+                                <input type="hidden" name="event_time_slot" id="event-time-slot">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="event-notes">Additional Notes (Optional)</label>
+                                <textarea name="event_notes" id="event-notes" class="form-textarea" rows="4"
+                                          placeholder="Any special requests or information for the event..."></textarea>
+                                <div class="form-hint">Let us know if you have any specific requirements or questions for the event.</div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeEventScheduleModal()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submit-event-schedule-btn" disabled>
+                                <span class="btn-text">
+                                    <i data-feather="star"></i>
+                                    Schedule Event
+                                </span>
+                                <span class="btn-loading" style="display: none;">
+                                    <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Processing...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Review Modal -->
-<div id="reviewModal" class="review-modal-overlay" style="display: none;">
-  <div class="review-modal">
-    <div class="review-modal-header">
-      <h3>Rate & Review Service</h3>
-      <button class="modal-close" onclick="closeReviewModal()">&times;</button>
+<div id="reviewModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2>Leave a Review</h2>
+            <button class="modal-close-btn" onclick="closeReviewModal()">&times;</button>
+        </div>
+        <form id="reviewForm">
+            {% csrf_token %}
+            <input type="hidden" name="service_id" id="review-service-id">
+            <input type="hidden" name="booking_id" id="review-booking-id">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Service</label>
+                    <div id="modal-service-name" class="service-name"></div>
+                    <div id="modal-church-name" class="church-name"></div>
+                </div>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="star-rating-modal">
+                        <div class="stars">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                        <input type="hidden" name="rating" id="modal-rating" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="review-comment">Comment (Optional)</label>
+                    <textarea name="comment" id="review-comment" rows="4" class="form-control" placeholder="Share your experience..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Submit Review</button>
+                <button type="button" class="btn btn-outline" onclick="closeReviewModal()">Cancel</button>
+            </div>
+        </form>
     </div>
-    
-    <div class="review-modal-content">
-      <div class="service-info-display">
-        <h4 id="modal-service-name"></h4>
-        <p id="modal-church-name"></p>
-      </div>
-
-      <form id="reviewForm" class="review-form-modal">
-        {% csrf_token %}
-        
-        <div class="form-group">
-          <label>Overall Rating *</label>
-          <div class="star-rating-modal" data-rating="0">
-            {% for i in "12345" %}
-              <i class="star" data-value="{{ i }}">★</i>
-            {% endfor %}
-          </div>
-          <input type="hidden" name="rating" id="modal-rating" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="modal-title">Review Title *</label>
-          <input type="text" name="title" id="modal-title" class="form-control" required placeholder="Summary of your experience">
-        </div>
-        
-        <div class="form-group">
-          <label for="modal-comment">Review Comment *</label>
-          <textarea name="comment" id="modal-comment" class="form-control" rows="4" required placeholder="Share your detailed experience..."></textarea>
-        </div>
-        
-        <div class="form-actions">
-          <button type="button" class="btn btn-outline" onclick="closeReviewModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Submit Review</button>
-        </div>
-      </form>
-    </div>
-  </div>
 </div>
 
-<!-- Cancel Booking Confirmation Modal -->
-<div id="cancelBookingModal" class="modal-overlay" style="display: none;">
-  <div class="modal-container" style="max-width: 500px;">
-    <div class="modal-header">
-      <h2 class="modal-title">Cancel Booking</h2>
-      <button class="modal-close-btn" onclick="closeCancelModal()">&times;</button>
-    </div>
-    
-    <div class="modal-body">
-      <div style="display: flex; align-items: flex-start; gap: 15px; padding: 20px; background: #fef2f2; border-left: 4px solid #dc2626; border-radius: 4px; margin-bottom: 20px;">
-        <i data-feather="alert-triangle" style="color: #dc2626; flex-shrink: 0; margin-top: 2px;"></i>
-        <div>
-          <p style="margin: 0 0 10px 0; font-weight: 600; color: #991b1b;">Are you sure you want to cancel this booking?</p>
-          <p style="margin: 0; color: #991b1b; font-size: 14px;">This action cannot be undone.</p>
-        </div>
-      </div>
-      
-      <div style="margin-bottom: 15px;">
-        <p style="margin: 5px 0;"><strong>Appointment ID:</strong> <span id="cancel-booking-code"></span></p>
-        <p style="margin: 5px 0;"><strong>Service:</strong> <span id="cancel-booking-service"></span></p>
-      </div>
-    </div>
-    
-    <div class="modal-footer" style="display: flex; gap: 12px; justify-content: flex-end;">
-      <button type="button" class="btn btn-outline" onclick="closeCancelModal()">No, Keep It</button>
-      <button type="button" class="btn btn-danger" onclick="cancelBooking()" id="confirm-cancel-btn">Yes, Cancel Booking</button>
-    </div>
-  </div>
-</div>
-
-<!-- External JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 <script>
-  // Django template variables for JavaScript
-  window.djangoUrls = {
-    createReviewUrl: "{% url 'core:create_service_review' service_id=0 %}"
-  };
-  
-  // Initialize Feather Icons
-  document.addEventListener('DOMContentLoaded', function() {
-    if (typeof feather !== 'undefined') {
-      feather.replace();
-    }
-  });
-</script>
-<script src="{% static 'js/my_appointments.js' %}?v={{ STATIC_VERSION }}"></script>
+    window.djangoUrls = { createReviewUrl: "{% url 'core:create_service_review' service_id=0 %}" };
+    document.addEventListener('DOMContentLoaded', function () { if (typeof feather !== 'undefined') feather.replace(); });
 
+    // Helper function to format available days from numbers to readable names
+    function formatAvailableDays(daysString) {
+        // Backend stores days using Python weekday(): 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
+        const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const days = daysString.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d) && d >= 0 && d <= 6);
+        return days.map(d => dayNames[d]).join(', ');
+    }
+
+    // Convert JS getDay() (0=Sun..6=Sat) to Python weekday() (0=Mon..6=Sun)
+    function jsDayToPythonWeekday(jsDay) {
+        // JS: 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+        // Python: 0=Mon,1=Tue,2=Wed,3=Thu,4=Fri,5=Sat,6=Sun
+        return jsDay === 0 ? 6 : jsDay - 1;
+    }
+
+    // Helper function to convert 12-hour time format to 24-hour format
+    function convertTo24Hour(timeString) {
+        // Handle formats like "08:00 AM", "2:00 PM", "10:30 AM", etc.
+        const match = timeString.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        if (!match) return timeString; // Return original if format doesn't match
+        
+        let [, hours, minutes, period] = match;
+        hours = parseInt(hours);
+        minutes = minutes.padStart(2, '0');
+        period = period.toUpperCase();
+        
+        if (period === 'PM' && hours !== 12) {
+            hours += 12;
+        } else if (period === 'AM' && hours === 12) {
+            hours = 0;
+        }
+        
+        return `${hours.toString().padStart(2, '0')}:${minutes}`;
+    }
+
+    // Helper function to restrict date picker to available days (for priest interviews)
+    function restrictDatePickerToAvailableDays(availableDaysString, preparationDays = 0) {
+        const dateInput = document.getElementById('schedule-date');
+        const helpText = document.getElementById('date-help-text');
+        
+        if (!availableDaysString || !availableDaysString.trim()) {
+            // If no available days, disable the date picker
+            dateInput.disabled = true;
+            helpText.textContent = 'No available days for this priest';
+            helpText.className = 'text-danger';
+            return;
+        }
+
+        // Parse available days (0=Sunday, 1=Monday, etc.)
+        const availableDays = availableDaysString.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d) && d >= 0 && d <= 6);
+        
+        if (availableDays.length === 0) {
+            dateInput.disabled = true;
+            helpText.textContent = 'No available days for this priest';
+            helpText.className = 'text-danger';
+            return;
+        }
+
+        // Enable the date picker
+        dateInput.disabled = false;
+        
+        // Update help text with available days info (no preparation days for interviews)
+        // Backend stores days using Python weekday(): 0=Mon, 1=Tue, ..., 5=Sat, 6=Sun
+        const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const availableDayNames = availableDays.map(d => dayNames[d]).join(', ');
+        
+        // Set minimum date to today (no preparation delay for interviews)
+        const today = new Date();
+        const minDate = new Date(today);
+        minDate.setDate(minDate.getDate() + 1); // Allow tomorrow onwards
+        dateInput.min = minDate.toISOString().split('T')[0];
+        
+        // Set maximum date based on service advance booking days
+        if (window.serviceAdvanceBookingDays) {
+            const maxDate = new Date(today);
+            maxDate.setDate(maxDate.getDate() + window.serviceAdvanceBookingDays);
+            dateInput.max = maxDate.toISOString().split('T')[0];
+        }
+        
+        // Update help text with booking window info (no preparation days for interviews)
+        let helpTextContent = `Available days: ${availableDayNames}`;
+        
+        if (window.serviceAdvanceBookingDays) {
+            const maxDate = new Date(today);
+            maxDate.setDate(maxDate.getDate() + window.serviceAdvanceBookingDays);
+            helpTextContent += ` | Booking window: ${maxDate.toLocaleDateString()}`;
+        }
+        
+        helpText.textContent = helpTextContent;
+        helpText.className = 'text-muted';
+
+        // Add date validation (no preparation days check for interviews)
+        dateInput.addEventListener('input', function() {
+            const selectedDate = new Date(this.value + 'T00:00:00'); // avoid timezone shift
+            const dayOfWeek = jsDayToPythonWeekday(selectedDate.getDay()); // convert to Python weekday (0=Mon..6=Sun)
+            
+            // Check booking window
+            let maxBookingDate = null;
+            if (window.serviceAdvanceBookingDays) {
+                maxBookingDate = new Date(today);
+                maxBookingDate.setDate(maxBookingDate.getDate() + window.serviceAdvanceBookingDays);
+            }
+            
+            if (!availableDays.includes(dayOfWeek)) {
+                // Invalid day selected
+                this.setCustomValidity(`Please select a day when the priest is available: ${availableDayNames}`);
+                helpText.textContent = `❌ Invalid day. Available days: ${availableDayNames}`;
+                helpText.className = 'text-danger';
+            } else if (selectedDate < minDate) {
+                // Date is in the past or today
+                this.setCustomValidity(`Please select a future date. Earliest: ${minDate.toLocaleDateString()}.`);
+                helpText.textContent = `❌ Date too early. Earliest: ${minDate.toLocaleDateString()}`;
+                helpText.className = 'text-danger';
+            } else if (maxBookingDate && selectedDate > maxBookingDate) {
+                // Too far - beyond booking window
+                this.setCustomValidity(`This service can only be booked up to ${window.serviceAdvanceBookingDays} days in advance. Please select a date on or before ${maxBookingDate.toLocaleDateString()}.`);
+                helpText.textContent = `❌ Beyond booking window. Latest date: ${maxBookingDate.toLocaleDateString()}`;
+                helpText.className = 'text-danger';
+            } else {
+                // Valid day
+                this.setCustomValidity('');
+                helpText.textContent = `✓ Valid date. Available days: ${availableDayNames}`;
+                helpText.className = 'text-success';
+            }
+        });
+
+        // Add custom date picker validation
+        dateInput.addEventListener('invalid', function() {
+            const selectedDate = new Date(this.value + 'T00:00:00');
+            const dayOfWeek = jsDayToPythonWeekday(selectedDate.getDay());
+            
+            if (!availableDays.includes(dayOfWeek)) {
+                this.setCustomValidity(`Please select a day when the priest is available: ${availableDayNames}`);
+            } else if (selectedDate < minDate) {
+                this.setCustomValidity(`Please select a future date. Earliest: ${minDate.toLocaleDateString()}.`);
+            } else if (maxBookingDate && selectedDate > maxBookingDate) {
+                this.setCustomValidity(`This service can only be booked up to ${window.serviceAdvanceBookingDays} days in advance. Please select a date on or before ${maxBookingDate.toLocaleDateString()}.`);
+            }
+        });
+    }
+
+    function openScheduleModal(id, code, service) {
+        document.getElementById('schedule-booking-id').value = id;
+        document.getElementById('scheduleModal').style.display = 'flex';
+        
+        // Reset date picker and help text
+        const dateInput = document.getElementById('schedule-date');
+        const helpText = document.getElementById('date-help-text');
+        dateInput.value = '';
+        dateInput.disabled = true;
+        helpText.textContent = 'Select a priest first to see available dates';
+        helpText.className = 'text-muted';
+        
+        fetch(`/app/api/booking/${id}/priests/`).then(r => r.json()).then(data => {
+            if (data.success) {
+                // Store service advance booking days for date validation
+                window.serviceAdvanceBookingDays = data.service_advance_booking_days;
+                
+                const c = document.getElementById('priests-container'); c.innerHTML = '';
+                data.priests.forEach(p => {
+                    const d = document.createElement('div'); d.className = 'priest-card';
+                    
+                    // Create photo element
+                    let photoHtml = '';
+                    if (p.photo_url) {
+                        photoHtml = `<img src="${p.photo_url}" alt="${p.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                     <div class="priest-photo-placeholder" style="display:none;">⛪</div>`;
+                    } else {
+                        photoHtml = '<div class="priest-photo-placeholder">⛪</div>';
+                    }
+                    
+                    // Format specializations
+                    let specializationsHtml = '';
+                    if (p.specializations && p.specializations.trim()) {
+                        specializationsHtml = `<div class="priest-specializations">${p.specializations}</div>`;
+                    }
+                    
+                    // Format availability with better day names
+                    let availabilityHtml = '';
+                    if (p.available_days && p.available_days.trim()) {
+                        const formattedDays = formatAvailableDays(p.available_days);
+                        availabilityHtml = `<div class="priest-availability">📅 ${formattedDays}</div>`;
+                    }
+                    
+                    d.innerHTML = `
+                        ${photoHtml}
+                        <div class="priest-name">${p.name}</div>
+                        ${p.title ? `<div class="priest-title">${p.title}</div>` : ''}
+                        ${specializationsHtml}
+                        ${availabilityHtml}
+                    `;
+                    
+                    d.onclick = () => {
+                        // Remove active class from all cards
+                        document.querySelectorAll('.priest-card').forEach(card => card.classList.remove('active'));
+                        // Add active class to selected card
+                        d.classList.add('active');
+                        
+                        document.getElementById('schedule-pastor-id').value = p.id;
+                        
+                        // Restrict date picker to this priest's available days and preparation days
+                        restrictDatePickerToAvailableDays(p.available_days, p.preparation_days);
+                        
+                        document.getElementById('time-selection-container').style.display = 'block';
+                        const tc = document.getElementById('time-slots-container'); tc.innerHTML = '';
+                        
+                        // Use priest's time slots or fallback to service time slots or default
+                        const timeSlots = p.available_time_slots || data.service_time_slots || '08:00 AM, 10:00 AM, 02:00 PM, 04:00 PM';
+                        timeSlots.split(',').forEach(s => {
+                            const lb = document.createElement('div'); lb.className = 'time-slot-btn'; lb.textContent = s.trim();
+                            lb.onclick = () => {
+                                // Remove active class from all time slots
+                                document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('active'));
+                                // Add active class to selected time slot
+                                lb.classList.add('active');
+                                
+                                // Convert time slot to 24-hour format for start_time
+                                const timeSlot = s.trim();
+                                const startTime = convertTo24Hour(timeSlot);
+                                
+                                document.getElementById('schedule-start-time').value = startTime;
+                                document.getElementById('schedule-time').value = timeSlot; // Use original format for time field
+                                document.getElementById('schedule-time-slot').value = timeSlot;
+                                document.getElementById('submit-schedule-btn').disabled = false;
+                            };
+                            tc.appendChild(lb);
+                        });
+                    };
+                    c.appendChild(d);
+                });
+            }
+        });
+    }
+    function closeScheduleModal() { 
+        document.getElementById('scheduleModal').style.display = 'none'; 
+    }
+    function closeEventScheduleModal() { 
+        document.getElementById('eventScheduleModal').style.display = 'none'; 
+    }
+    function openEventScheduleModal(id, code, service) {
+        console.log('openEventScheduleModal called with:', {id, code, service});
+        
+        document.getElementById('event-booking-id').value = id;
+        document.getElementById('eventScheduleModal').style.display = 'flex';
+        
+        console.log('Modal opened, fetching priest data...');
+        
+        // Fetch the booking to get the assigned priest's preparation days
+        fetch(`/app/api/booking/${id}/priests/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.priests) {
+                    // Debug: Log the API response
+                    console.log('Event Schedule API Response:', data);
+                    
+                    // Find the assigned priest (if any)
+                    const assignedPriestId = data.current_pastor_id;
+                    console.log('Assigned Priest ID:', assignedPriestId);
+                    console.log('Available Priests:', data.priests);
+                    
+                    let preparationDays = 30; // Default fallback
+                    
+                    if (assignedPriestId) {
+                        const assignedPriest = data.priests.find(p => p.id === assignedPriestId);
+                        if (assignedPriest && assignedPriest.preparation_days) {
+                            preparationDays = assignedPriest.preparation_days;
+                        }
+                    }
+                    
+                    // Set minimum date based on preparation days
+                    const eventDateInput = document.getElementById('event-date-input');
+                    const today = new Date();
+                    const minDate = new Date(today);
+                    minDate.setDate(minDate.getDate() + preparationDays);
+                    
+                    eventDateInput.min = minDate.toISOString().split('T')[0];
+                    
+                    // Add help text to show preparation requirement
+                    let helpText = document.getElementById('event-date-help-text');
+                    if (!helpText) {
+                        helpText = document.createElement('small');
+                        helpText.id = 'event-date-help-text';
+                        helpText.className = 'text-muted';
+                        eventDateInput.parentNode.appendChild(helpText);
+                    }
+                    
+                    if (preparationDays > 0) {
+                        helpText.textContent = `Event requires ${preparationDays} days preparation (earliest: ${minDate.toLocaleDateString()})`;
+                    } else {
+                        helpText.textContent = 'Select your preferred event date';
+                    }
+                    
+                    // Populate event requirements and preparation notes
+                    const eventRequirements = document.getElementById('event-requirements');
+                    const eventRequirementsList = document.getElementById('event-requirements-list');
+                    const eventPreparation = document.getElementById('event-preparation');
+                    const eventPreparationNotes = document.getElementById('event-preparation-notes');
+                    
+                    // Clear previous content
+                    if (eventRequirementsList) eventRequirementsList.innerHTML = '';
+                    if (eventPreparationNotes) eventPreparationNotes.textContent = '';
+                    
+                    // Add event requirements
+                    const eventRequirementsData = [
+                        'Event date must be at least ' + preparationDays + ' days from today',
+                        'Priest availability will be confirmed after scheduling',
+                        'Event location must be confirmed with the church',
+                        'Additional fees may apply for special ceremonies'
+                    ];
+                    
+                    if (eventRequirementsList && eventRequirementsData.length > 0) {
+                        eventRequirementsData.forEach(req => {
+                            const li = document.createElement('li');
+                            li.style.marginBottom = '0.25rem';
+                            li.textContent = req;
+                            eventRequirementsList.appendChild(li);
+                        });
+                        eventRequirements.style.display = 'block';
+                    }
+                    
+                    // Add preparation notes
+                    const preparationNotesText = `Please ensure all event preparations are completed at least ${preparationDays} days before the event. This includes coordinating with the assigned priest, confirming venue arrangements, and preparing any required documents or ceremonial items.`;
+                    
+                    if (eventPreparationNotes) {
+                        eventPreparationNotes.textContent = preparationNotesText;
+                        eventPreparation.style.display = 'block';
+                    }
+                    
+                    // Populate priest information
+                    const priestPhoto = document.getElementById('event-priest-photo');
+                    const priestName = document.getElementById('event-priest-name');
+                    const priestTitle = document.getElementById('event-priest-title');
+                    
+                    console.log('Populating priest info...');
+                    console.log('Assigned Priest ID:', assignedPriestId);
+                    console.log('Priests array:', data.priests);
+                    
+                    if (assignedPriestId && data.priests) {
+                        const assignedPriest = data.priests.find(p => p.id === assignedPriestId);
+                        console.log('Found assigned priest:', assignedPriest);
+                        
+                        if (assignedPriest) {
+                            // Update priest photo
+                            if (priestPhoto && assignedPriest.photo_url) {
+                                priestPhoto.innerHTML = `<img src="${assignedPriest.photo_url}" alt="${assignedPriest.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<i data-feather=&quot;user&quot; style=&quot;width: 24px; height: 24px; color: #9CA3AF;&quot;></i>';">`;
+                            } else if (priestPhoto) {
+                                priestPhoto.innerHTML = '<i data-feather="user" style="width: 24px; height: 24px; color: #9CA3AF;"></i>';
+                            }
+                            
+                            // Update priest info - use correct field names from API
+                            if (priestName) {
+                                priestName.textContent = assignedPriest.name || 'Priest';
+                                console.log('Set priest name to:', assignedPriest.name);
+                            }
+                            if (priestTitle) {
+                                priestTitle.textContent = assignedPriest.title || 'Priest';
+                                console.log('Set priest title to:', assignedPriest.title);
+                            }
+                        } else {
+                            // No assigned priest found
+                            console.log('No assigned priest found in array');
+                            if (priestName) priestName.textContent = 'No priest assigned';
+                            if (priestTitle) priestTitle.textContent = 'Please contact church office';
+                        }
+                    } else {
+                        // No priest assigned
+                        console.log('No priest assigned or no priests data');
+                        if (priestName) priestName.textContent = 'No priest assigned';
+                        if (priestTitle) priestTitle.textContent = 'Please contact church office';
+                    }
+                    
+                    // Display service information using the passed service name
+                    const servicePhoto = document.getElementById('event-service-photo');
+                    const serviceName = document.getElementById('event-service-name');
+                    const serviceDescription = document.getElementById('event-service-description');
+                    
+                    // Update service photo with placeholder
+                    if (servicePhoto) {
+                        servicePhoto.innerHTML = '<i data-feather="calendar" style="width: 32px; height: 32px; color: #9CA3AF;"></i>';
+                    }
+                    
+                    // Update service info
+                    if (serviceName) serviceName.textContent = service || 'Service';
+                    if (serviceDescription) serviceDescription.textContent = 'Click to schedule your event date and time. The assigned priest will review and confirm availability.';
+                    
+                    // Re-initialize feather icons
+                    if (typeof feather !== 'undefined') {
+                        feather.replace();
+                    }
+                    
+                    // Add validation to ensure preparation days are respected
+                    eventDateInput.addEventListener('input', function() {
+                        const selectedDate = new Date(this.value);
+                        const daysUntilSelected = Math.ceil((selectedDate - today) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysUntilSelected < preparationDays) {
+                            this.setCustomValidity(`This event requires ${preparationDays} days preparation. Please select a date on or after ${minDate.toLocaleDateString()}.`);
+                            helpText.textContent = `❌ Too soon. Event requires ${preparationDays} days preparation (earliest: ${minDate.toLocaleDateString()})`;
+                            helpText.className = 'text-danger';
+                        } else {
+                            this.setCustomValidity('');
+                            if (preparationDays > 0) {
+                                helpText.textContent = `✓ Valid date. ${preparationDays} days preparation required`;
+                                helpText.className = 'text-success';
+                            } else {
+                                helpText.textContent = '✓ Valid date';
+                                helpText.className = 'text-success';
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching priest data:', error);
+                // Fallback: set minimum date to tomorrow if we can't fetch preparation days
+                const eventDateInput = document.getElementById('event-date-input');
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                eventDateInput.min = tomorrow.toISOString().split('T')[0];
+            });
+    }
+
+    // Star rating functionality
+    function updateStarDisplay(rating) {
+        const stars = document.querySelectorAll('.star-rating-modal .star');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('filled');
+            } else {
+                star.classList.remove('filled');
+            }
+        });
+    }
+
+    function updateStarPreview(rating) {
+        const stars = document.querySelectorAll('.star-rating-modal .star');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.style.color = '#FCD34D';
+            } else {
+                star.style.color = '#D1D5DB';
+            }
+        });
+    }
+
+    // Helper function to get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Handle review form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle schedule form submission
+        const scheduleForm = document.getElementById('scheduleForm');
+        if (scheduleForm) {
+            scheduleForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const submitBtn = document.getElementById('submit-schedule-btn');
+                const btnText = submitBtn?.querySelector('.btn-text');
+                const btnLoading = submitBtn?.querySelector('.btn-loading');
+                
+                // Debug: Log all form data
+                console.log('Form data being submitted:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+                
+                // Debug: Check form values directly
+                console.log('Direct form values:');
+                console.log('Date input value:', document.getElementById('schedule-date')?.value);
+                console.log('Pastor ID value:', document.getElementById('schedule-pastor-id')?.value);
+                console.log('Start time value:', document.getElementById('schedule-start-time')?.value);
+                console.log('Time value:', document.getElementById('schedule-time')?.value);
+                console.log('Time slot value:', document.getElementById('schedule-time-slot')?.value);
+                
+                // Check if all required fields are present
+                const requiredFields = ['booking_id', 'date'];
+                const missingFields = requiredFields.filter(field => !formData.get(field));
+                if (missingFields.length > 0) {
+                    console.error('Missing required fields:', missingFields);
+                    alert(`Missing required fields: ${missingFields.join(', ')}`);
+                    return;
+                }
+                
+                // Disable button and show loading state
+                if (submitBtn) submitBtn.disabled = true;
+                if (btnText) btnText.style.display = 'none';
+                if (btnLoading) btnLoading.style.display = 'inline-flex';
+                
+                fetch('/app/booking/' + formData.get('booking_id') + '/schedule/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken')
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Handle validation errors
+                        return response.json().then(data => {
+                            if (data.errors) {
+                                // Format validation errors for display
+                                const errorMessages = [];
+                                for (const [field, errors] of Object.entries(data.errors)) {
+                                    errorMessages.push(`${field}: ${errors.join(', ')}`);
+                                }
+                                throw new Error(errorMessages.join('\n'));
+                            } else {
+                                throw new Error(data.message || 'Server error occurred');
+                            }
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Your schedule request has been submitted for approval.');
+                        closeScheduleModal();
+                        // Reload page to show updated status
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Error submitting schedule request. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting schedule request:', error);
+                    
+                    // Handle specific validation errors
+                    if (error.message.includes('beyond the allowed booking window')) {
+                        alert('The selected date is beyond the allowed booking window. Please choose a date that is within the service\'s advance booking limit.');
+                    } else if (error.message.includes('closed')) {
+                        alert('The selected date is closed for bookings. Please choose another date.');
+                    } else if (error.message.includes('future date')) {
+                        alert('Please choose a future date for your appointment.');
+                    } else {
+                        alert(error.message || 'Error submitting schedule request. Please try again.');
+                    }
+                })
+                .finally(() => {
+                    // Re-enable button and reset loading state
+                    if (submitBtn) submitBtn.disabled = false;
+                    if (btnText) btnText.style.display = 'inline-flex';
+                    if (btnLoading) btnLoading.style.display = 'none';
+                });
+            });
+        }
+        
+        const reviewForm = document.getElementById('reviewForm');
+        if (reviewForm) {
+            reviewForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const rating = document.getElementById('modal-rating').value;
+                
+                if (!rating) {
+                    alert('Please select a rating');
+                    return;
+                }
+                
+                // Get service ID from the hidden input or currentServiceId
+                const serviceId = document.getElementById('review-service-id').value || currentServiceId;
+                
+                // Create the review URL dynamically
+                const reviewUrl = window.djangoUrls.createReviewUrl.replace('service_id=0', `service_id=${serviceId}`);
+                
+                fetch(reviewUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Thank you for your review!');
+                        closeReviewModal();
+                        // Optionally reload the page to update the UI
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Error submitting review. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting review:', error);
+                    alert('Error submitting review. Please try again.');
+                });
+            });
+        }
+        
+        // Star rating click handlers
+        const stars = document.querySelectorAll('.star-rating-modal .star');
+        stars.forEach((star, index) => {
+            star.addEventListener('click', function() {
+                const rating = index + 1;
+                document.getElementById('modal-rating').value = rating;
+                updateStarDisplay(rating);
+            });
+
+            star.addEventListener('mouseenter', function() {
+                const rating = index + 1;
+                updateStarPreview(rating);
+            });
+        });
+
+        // Reset star display on mouse leave
+        const starRatingModal = document.querySelector('.star-rating-modal');
+        if (starRatingModal) {
+            starRatingModal.addEventListener('mouseleave', function() {
+                const currentRating = parseInt(document.getElementById('modal-rating').value) || 0;
+                updateStarDisplay(currentRating);
+            });
+        }
+    });
+</script>
+<script src="{% static 'js/event_time_slots.js' %}?v={{ STATIC_VERSION }}"></script>
+<script src="{% static 'js/my_appointments.js' %}?v={{ STATIC_VERSION }}"></script>
 {% endblock %}

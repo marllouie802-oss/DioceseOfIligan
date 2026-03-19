@@ -4,6 +4,7 @@ from . import api_views
 from . import donation_views
 from . import booking_payment_views
 from . import chat_api
+from . import views_booking
 
 app_name = 'core'
 
@@ -26,6 +27,8 @@ urlpatterns = [
     path('events/', views.events, name='events'),
     path('appointments/', views.appointments, name='appointments'),
     path('cancel-booking/<int:booking_id>/', views.cancel_booking, name='cancel_booking'),
+    path('booking/<int:booking_id>/schedule/', views_booking.schedule_booking_date, name='schedule_booking'),
+    path('api/booking/<int:booking_id>/priests/', views_booking.api_booking_priests, name='api_booking_priests'),
     path('following/', views.following, name='following'),
     path('manage/', views.manage, name='manage'),
     path('settings/', views.settings_page, name='settings_page'),
@@ -90,17 +93,37 @@ urlpatterns = [
     path('delete-service-image/<int:image_id>/', views.delete_service_image, name='delete_service_image'),
     path('service-gallery/<int:service_id>/', views.service_gallery, name='service_gallery'),
     path('book-service/<int:service_id>/', views.book_service, name='book_service'),
+    path('booking/<int:booking_id>/select-pastor/', views.select_pastor, name='select_pastor'),
+    path('booking/<int:booking_id>/schedule-date/', views.schedule_date, name='schedule_date'),
     path('manage-booking/<int:booking_id>/', views.manage_booking, name='manage_booking'),
     path('booking-invoice/<int:booking_id>/', views.booking_invoice, name='booking_invoice'),
     path('create-booking-manually/', views.create_booking_manually, name='create_booking_manually'),
     path('api/search-users/', views.search_users_api, name='search_users_api'),
     path('api/test/', views.api_test, name='api_test'),
     path('api/bookings/create/', views.create_booking_api, name='create_booking_api'),
+    
+    # New Booking Flow
+    path('booking/request/<int:service_id>/', views_booking.submit_booking_request, name='submit_booking_request'),
+    path('booking/<int:booking_id>/approve-requirements/', views_booking.admin_approve_request_requirements, name='admin_approve_request_requirements'),
+    path('booking/<int:booking_id>/verify-requirements/', views_booking.admin_verify_requirements, name='admin_verify_requirements'),
+    path('booking/<int:booking_id>/schedule/', views_booking.schedule_booking_date, name='schedule_booking_date'),
+    path('booking/<int:booking_id>/available-priests/', views_booking.api_booking_priests, name='api_booking_priests'),
+    path('booking/<int:booking_id>/approve-schedule/', views_booking.admin_approve_schedule_request, name='admin_approve_schedule_request'),
+    path('booking/<int:booking_id>/mark-interview-completed/', views_booking.admin_mark_interview_completed, name='admin_mark_interview_completed'),
+    path('booking/<int:booking_id>/schedule-event/', views_booking.schedule_event_date, name='schedule_event_date'),
+
     path('api/service/<int:service_id>/', views.api_get_service, name='api_get_service'),
     path('api/service-images/<int:service_id>/', views.api_service_images, name='api_service_images'),
     path('api/church/<int:church_id>/availability/', views.api_get_church_availability, name='api_get_church_availability'),
     path('api/church/<int:church_id>/pending-booking-dates/', views.api_get_pending_booking_dates, name='api_get_pending_booking_dates'),
     path('api/church/<int:church_id>/services/', views.api_get_church_services, name='api_get_church_services'),
+    
+    # Priest Management API endpoints
+    path('api/church/<int:church_id>/priests/', views.api_list_priests, name='api_list_priests'),
+    path('api/church/<int:church_id>/priests/create/', views.api_create_priest, name='api_create_priest'),
+    path('api/church/<int:church_id>/priests/<int:priest_id>/', views.api_get_priest, name='api_get_priest'),
+    path('api/church/<int:church_id>/priests/<int:priest_id>/update/', views.api_update_priest, name='api_update_priest'),
+    path('api/church/<int:church_id>/priests/<int:priest_id>/delete/', views.api_delete_priest, name='api_delete_priest'),
     
     # Availability Management
     path('manage-availability/', views.manage_availability, name='manage_availability'),
@@ -202,6 +225,7 @@ urlpatterns = [
     path('api/conversations/<int:conversation_id>/read/', chat_api.mark_conversation_read, name='mark_conversation_read'),
     path('api/conversations/<int:conversation_id>/typing/', chat_api.conversation_typing, name='conversation_typing'),
     path('api/conversations/<int:conversation_id>/typing-status/', chat_api.conversation_typing_status, name='conversation_typing_status'),
+    path('api/send-message-to-user/', chat_api.send_message_to_user, name='send_message_to_user'),
     
     # Payment URLs (deprecated - keeping for backward compatibility)
     path('payment/gcash/<int:booking_id>/', views.gcash_payment, name='gcash_payment'),

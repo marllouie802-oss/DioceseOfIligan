@@ -144,6 +144,28 @@
                 <div class="form-error">{{ form.advance_booking_days.errors.0 }}</div>
               {% endif %}
             </div>
+            
+            <div class="form-group">
+              <label for="{{ form.event_preparation_days.id_for_label }}" class="form-label">Event Preparation Days</label>
+              {{ form.event_preparation_days }}
+              <small class="form-help">Minimum days needed before an event</small>
+              {% if form.event_preparation_days.errors %}
+                <div class="form-error">{{ form.event_preparation_days.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <!-- Available Time Slots -->
+          <div class="form-group form-group-full">
+            <label class="form-label">Available Time Slots</label>
+            <div id="service-time-slots-container" class="time-slots-container">
+              <!-- Time slots will be populated by JavaScript -->
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addServiceTimeSlot()">+ Add Time Slot</button>
+            <small class="form-help">Set the available time slots for this service (e.g., 9:00 AM - 11:00 AM)</small>
+            
+            <!-- Hidden field to store time slots data -->
+            <input type="hidden" name="available_time_slots" id="service-available-time-slots" value="{{ service.available_time_slots|default:'' }}">
           </div>
         </div>
 
@@ -248,6 +270,180 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Listen for changes
     isFreeCheckbox.addEventListener('change', togglePricingFields);
+    
+    // Service Time Slots Management
+    let serviceTimeSlotCounter = 0;
+    
+    function addServiceTimeSlot() {
+      const container = document.getElementById('service-time-slots-container');
+      const slotDiv = document.createElement('div');
+      slotDiv.className = 'time-slot-item';
+      slotDiv.innerHTML = `
+        <div class="time-slot-row">
+          <input type="time" name="service_start_time_${serviceTimeSlotCounter}" class="form-control time-start" placeholder="Start">
+          <span class="time-separator">to</span>
+          <input type="time" name="service_end_time_${serviceTimeSlotCounter}" class="form-control time-end" placeholder="End">
+          <button type="button" class="btn btn-outline btn-sm" onclick="removeServiceTimeSlot(${serviceTimeSlotCounter})">×</button>
+        </div>
+      `;
+      container.appendChild(slotDiv);
+      serviceTimeSlotCounter++;
+      
+      // Update remove buttons visibility
+      updateServiceRemoveButtons();
+    }
+    
+    function removeServiceTimeSlot(index) {
+      const container = document.getElementById('service-time-slots-container');
+      const slots = container.querySelectorAll('.time-slot-item');
+      
+      if (slots.length > 1) {
+        // Find the slot with the given index and remove it
+        slots.forEach(slot => {
+          const removeBtn = slot.querySelector('button[onclick*="' + index + '"]');
+          if (removeBtn) {
+            slot.remove();
+          }
+        });
+        
+        // Update remove buttons visibility
+        updateServiceRemoveButtons();
+      }
+    }
+    
+    function updateServiceRemoveButtons() {
+      const container = document.getElementById('service-time-slots-container');
+      const slots = container.querySelectorAll('.time-slot-item');
+      const removeButtons = container.querySelectorAll('button[onclick^="removeServiceTimeSlot"]');
+      
+      // Hide remove button if only one slot, show if multiple
+      removeButtons.forEach(btn => {
+        btn.style.display = slots.length > 1 ? 'inline-block' : 'none';
+      });
+    }
+    
+    // Function to collect time slots data and update hidden field
+    function collectServiceTimeSlots() {
+      const container = document.getElementById('service-time-slots-container');
+      const slots = container.querySelectorAll('.time-slot-item');
+      const timeSlots = [];
+      
+      slots.forEach(slot => {
+        const startInput = slot.querySelector('input[name^="service_start_time_"]');
+        const endInput = slot.querySelector('input[name^="service_end_time_"]');
+        
+        if (startInput && endInput && startInput.value && endInput.value) {
+          // Convert 24-hour format to 12-hour format for storage
+          const startTime = convert24to12(startInput.value);
+          const endTime = convert24to12(endInput.value);
+          timeSlots.push(`${startTime} - ${endTime}`);
+        }
+      });
+      
+      // Update hidden field
+      const hiddenField = document.getElementById('service-available-time-slots');
+      hiddenField.value = timeSlots.join(', ');
+    }
+    
+    // Helper function to convert 24-hour time to 12-hour format
+    function convert24to12(time24) {
+      if (!time24) return '';
+      
+      const [hours, minutes] = time24.split(':');
+      let h = parseInt(hours);
+      const m = minutes;
+      let period = 'AM';
+      
+      if (h >= 12) {
+        period = 'PM';
+        if (h > 12) h -= 12;
+      } else if (h === 0) {
+        h = 12;
+      }
+      
+      return `${h}:${m} ${period}`;
+    }
+    
+    // Function to load existing time slots
+    function loadServiceTimeSlots(timeSlotsString) {
+      const container = document.getElementById('service-time-slots-container');
+      container.innerHTML = '';
+      serviceTimeSlotCounter = 0;
+      
+      if (!timeSlotsString || !timeSlotsString.trim()) {
+        // Add one empty slot
+        addServiceTimeSlot();
+        return;
+      }
+      
+      // Parse time slots (format: "9:00 AM - 11:00 AM, 1:00 PM - 4:00 PM")
+      const slots = timeSlotsString.split(',').map(slot => slot.trim()).filter(slot => slot);
+      
+      slots.forEach((slot, index) => {
+        // Parse the time slot
+        const match = slot.match(/(\d{1,2}:\d{2}\s*[AP]M)\s*-\s*(\d{1,2}:\d{2}\s*[AP]M)/);
+        if (match) {
+          const [, startTime, endTime] = match;
+          
+          const slotDiv = document.createElement('div');
+          slotDiv.className = 'time-slot-item';
+          slotDiv.innerHTML = `
+            <div class="time-slot-row">
+              <input type="time" name="service_start_time_${index}" class="form-control time-start" value="${convert12to24(startTime)}" placeholder="Start">
+              <span class="time-separator">to</span>
+              <input type="time" name="service_end_time_${index}" class="form-control time-end" value="${convert12to24(endTime)}" placeholder="End">
+              <button type="button" class="btn btn-outline btn-sm" onclick="removeServiceTimeSlot(${index})" ${index > 0 ? '' : 'style="display: none;"'}>×</button>
+            </div>
+          `;
+          container.appendChild(slotDiv);
+          serviceTimeSlotCounter = index;
+        }
+      });
+      
+      // Add one empty slot at the end
+      addServiceTimeSlot();
+    }
+    
+    // Helper function to convert 12-hour time to 24-hour format
+    function convert12to24(time12) {
+      if (!time12) return '';
+      
+      const match = time12.match(/(\d{1,2}):(\d{2})\s*([AP]M)/i);
+      if (!match) return '';
+      
+      let [, hours, minutes, period] = match;
+      hours = parseInt(hours);
+      period = period.toUpperCase();
+      
+      // Convert to 24-hour format
+      if (period === 'PM' && hours !== 12) {
+        hours += 12;
+      } else if (period === 'AM' && hours === 12) {
+        hours = 0;
+      }
+      
+      // Format as HH:MM
+      return `${hours.toString().padStart(2, '0')}:${minutes}`;
+    }
+    
+    // Load existing time slots on page load
+    const existingTimeSlots = document.getElementById('service-available-time-slots').value;
+    if (existingTimeSlots) {
+      loadServiceTimeSlots(existingTimeSlots);
+    } else {
+      // Add one empty slot if no existing slots
+      addServiceTimeSlot();
+    }
+    
+    // Add event listeners to time inputs to update hidden field
+    const container = document.getElementById('service-time-slots-container');
+    if (container) {
+      container.addEventListener('input', function(e) {
+        if (e.target.classList.contains('time-start') || e.target.classList.contains('time-end')) {
+          collectServiceTimeSlots();
+        }
+      });
+    }
     
     // Handle form submission
     form.addEventListener('submit', function(e) {

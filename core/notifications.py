@@ -236,38 +236,42 @@ class NotificationTemplates:
     @staticmethod
     def booking_requested(booking):
         """Template for new booking request notification."""
+        date_str = booking.date.strftime("%b %d, %Y") if booking.date else "Date Pending"
         return {
             'title': f'New Appointment Request - {booking.church.name}',
-            'message': f'{booking.user.get_full_name() or booking.user.username} has requested an appointment for \'{booking.service.name}\' on {booking.date.strftime("%b %d, %Y")}. Please review and respond.',
+            'message': f'{booking.user.get_full_name() or booking.user.username} has requested an appointment for \'{booking.service.name}\' ({date_str}). Please review and respond.',
             'priority': Notification.PRIORITY_HIGH
         }
     
     @staticmethod
     def booking_reviewed(booking):
         """Template for booking reviewed notification (to requester)."""
+        date_str = booking.date.strftime("%b %d, %Y") if booking.date else "Date Pending"
         return {
             'title': f'Appointment Under Review - {booking.church.name}',
-            'message': f'Your appointment for \'{booking.service.name}\' on {booking.date.strftime("%b %d, %Y")} is currently under review. We will update you soon.',
+            'message': f'Your appointment for \'{booking.service.name}\' ({date_str}) is currently under review. We will update you soon.',
             'priority': Notification.PRIORITY_MEDIUM
         }
     
     @staticmethod
     def booking_approved(booking):
         """Template for booking approved notification."""
+        date_str = booking.date.strftime("%b %d, %Y") if booking.date else "Date Pending"
         return {
             'title': f'Appointment Approved - {booking.church.name}',
-            'message': f'Your appointment for \'{booking.service.name}\' on {booking.date.strftime("%b %d, %Y")} has been approved. Please arrive on time.',
+            'message': f'Your appointment for \'{booking.service.name}\' ({date_str}) has been approved. Please arrive on time.',
             'priority': Notification.PRIORITY_MEDIUM
         }
     
     @staticmethod
     def booking_declined(booking):
         """Template for booking declined notification."""
+        date_str = booking.date.strftime("%b %d, %Y") if booking.date else "Date Pending"
         reason = (booking.decline_reason or '').strip()
         message = (
-            f"Your appointment for '{booking.service.name}' on {booking.date.strftime('%b %d, %Y')} has been declined. Reason: {reason}."
+            f"Your appointment for '{booking.service.name}' ({date_str}) has been declined. Reason: {reason}."
             if reason else
-            f"Your appointment for '{booking.service.name}' on {booking.date.strftime('%b %d, %Y')} has been declined. Please contact the church for more information."
+            f"Your appointment for '{booking.service.name}' ({date_str}) has been declined. Please contact the church for more information."
         )
         return {
             'title': f'Appointment Declined - {booking.church.name}',
@@ -278,18 +282,20 @@ class NotificationTemplates:
     @staticmethod
     def booking_canceled(booking):
         """Template for booking canceled notification."""
+        date_str = booking.date.strftime("%b %d, %Y") if booking.date else "Date Pending"
         return {
             'title': f'Appointment Canceled - {booking.church.name}',
-            'message': f'Your appointment for \'{booking.service.name}\' on {booking.date.strftime("%b %d, %Y")} has been canceled. {booking.cancel_reason or "Please contact the church for more information."}',
+            'message': f'Your appointment for \'{booking.service.name}\' ({date_str}) has been canceled. {booking.cancel_reason or "Please contact the church for more information."}',
             'priority': Notification.PRIORITY_MEDIUM
         }
     
     @staticmethod
     def booking_completed(booking):
         """Template for booking completed notification."""
+        date_str = booking.date.strftime("%b %d, %Y") if booking.date else "Date Pending"
         return {
             'title': f'Appointment Completed - {booking.church.name}',
-            'message': f'Your appointment for \'{booking.service.name}\' on {booking.date.strftime("%b %d, %Y")} has been marked as completed. Thank you for using our services!',
+            'message': f'Your appointment for \'{booking.service.name}\' ({date_str}) has been marked as completed. Thank you for using our services!',
             'priority': Notification.PRIORITY_LOW
         }
     
@@ -308,6 +314,25 @@ class NotificationTemplates:
         return {
             'title': f'Church Declined - {church.name}',
             'message': 'Your church application has been declined. Please review the requirements and try again.',
+            'priority': Notification.PRIORITY_HIGH
+        }
+
+    @staticmethod
+    def booking_interview_completed(booking):
+        """Template for interview completed notification."""
+        return {
+            'title': f'Interview Completed - {booking.church.name}',
+            'message': f'Your interview for {booking.service.name} has been completed. You may now proceed to schedule your event date.',
+            'priority': Notification.PRIORITY_HIGH
+        }
+
+    @staticmethod
+    def booking_event_scheduled(booking):
+        """Template for event scheduled notification."""
+        date_str = booking.event_date.strftime("%b %d, %Y") if booking.event_date else "Date Pending"
+        return {
+            'title': f'Event Scheduled - {booking.church.name}',
+            'message': f'Your event \'{booking.service.name}\' has been scheduled for {date_str}.',
             'priority': Notification.PRIORITY_HIGH
         }
 

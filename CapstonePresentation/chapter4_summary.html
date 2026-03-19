@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chapter 4 Summary - Usability Results</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f7f7f7; }
+    h1, h2 { text-align: center; }
+    .section { background: #ffffff; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .charts { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+    .chart-box { flex: 1 1 320px; max-width: 480px; background: #fafafa; padding: 15px; border-radius: 8px; }
+    canvas { width: 100% !important; height: 280px !important; }
+    ul { line-height: 1.6; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; margin-left: 8px; }
+    .badge-good { background: #d1fae5; color: #065f46; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-bad { background: #fee2e2; color: #991b1b; }
+    .footer { text-align: center; font-size: 12px; color: #666; margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <h1>Chapter 4 Summary</h1>
+  <h2>Usability of the Integrated Digital Platform for the Diocese of Iligan</h2>
+
+  <div class="section">
+    <h3>Overall SUS Results</h3>
+    <p>
+      The System Usability Scale (SUS) was used to evaluate the platform across all respondents.
+      The overall SUS score is <strong>58.6 / 100</strong>, which falls under the "Below Average" category and is significantly below the industry average of 68.
+    </p>
+    <div class="charts">
+      <div class="chart-box">
+        <h4>SUS Scores by User Group</h4>
+        <canvas id="susByGroup"></canvas>
+      </div>
+      <div class="chart-box">
+        <h4>Overall SUS Score vs. Benchmark</h4>
+        <canvas id="susOverall"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>User Group Comparison</h3>
+    <p>The SUS evaluation reveals a significant gap between different user groups, highlighting usability challenges for ordinary parishioners.</p>
+    <div class="charts">
+      <div class="chart-box">
+        <h4>Average Scores per Section (1–5)</h4>
+        <canvas id="sectionScores"></canvas>
+      </div>
+    </div>
+    <ul>
+      <li><strong>Citizens SUS Score:</strong> 57.9/100 <span class="badge badge-bad">Marginal</span></li>
+      <li><strong>Parish Staff SUS Score:</strong> 87.5/100 <span class="badge badge-good">Excellent</span></li>
+      <li><strong>Gap between staff and citizens:</strong> 30-point difference in user experience</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h3>Key Strengths</h3>
+    <ul>
+      <li><strong>System integration:</strong> Features connect well together in one platform<span class="badge badge-good">Positive</span></li>
+      <li><strong>Interface consistency:</strong> 82.25/100 - users find the interface consistent<span class="badge badge-good">Strong</span></li>
+      <li><strong>Feature integration:</strong> 71.25/100 - technical foundation is sound<span class="badge badge-good">Good</span></li>
+      <li><strong>Frequency of use desire:</strong> 68.25/100 - people want to use the system regularly<span class="badge badge-good">Positive</span></li>
+      <li>Reading bulletins and keeping up with parish activities works well for basic tasks.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h3>Key Problems</h3>
+    <div class="charts">
+      <div class="chart-box">
+        <h4>Critical Issues (SUS Scores)</h4>
+        <canvas id="problemItems"></canvas>
+      </div>
+    </div>
+    <ul>
+      <li><strong>Booking and donation processes:</strong> 48-50 points – unnecessarily complex and earn lowest satisfaction scores.<span class="badge badge-bad">Critical</span></li>
+      <li><strong>PayPal payment process:</strong> Confusing for most users; Filipinos prefer GCash and PayMaya which aren't supported.<span class="badge badge-bad">Critical</span></li>
+      <li><strong>Learning curve:</strong> Users need significant time and effort before becoming comfortable.<span class="badge badge-bad">High barrier</span></li>
+      <li><strong>Independence:</strong> Only 41% feel confident using the system independently.<span class="badge badge-bad">Low confidence</span></li>
+      <li><strong>Technical support dependency:</strong> 50% feel they need technical support to use the system effectively.<span class="badge badge-bad">High dependency</span></li>
+      <li><strong>Accessibility for seniors:</strong> Older parishioners especially struggle with the system complexity.<span class="badge badge-warning">Age barrier</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h3>Interpretation</h3>
+    <ul>
+      <li>The platform <strong>works but doesn't work well for all users</strong> – there's a critical 30-point gap between staff (87.5) and citizens (57.9).</li>
+      <li><strong>System is designed for administrators, not parishioners:</strong> Staff use it daily and know workarounds, but 96% of users (citizens) struggle.</li>
+      <li><strong>Technical capability vs. usability gap:</strong> The system can do what it needs to do, but makes people work too hard to do it.</li>
+      <li><strong>Barrier to parish engagement:</strong> Complex processes prevent meaningful interaction with parish community.</li>
+      <li><strong>Need for user-centered design:</strong> System assumes everyone knows what they're doing, causing half the community to struggle.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    Generated summary based on Chapter 4 usability results for the Diocese of Iligan platform.
+  </div>
+
+  <script>
+    // SUS by group
+    const susByGroupCtx = document.getElementById('susByGroup');
+    new Chart(susByGroupCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Parish Staff', 'Citizens'],
+        datasets: [{
+          label: 'SUS Score',
+          data: [87.5, 57.9],
+          backgroundColor: ['#4ade80', '#f87171']
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        }
+      }
+    });
+
+    // Overall SUS vs benchmark
+    const susOverallCtx = document.getElementById('susOverall');
+    new Chart(susOverallCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Platform Overall', 'Industry Benchmark'],
+        datasets: [{
+          label: 'SUS Score',
+          data: [58.6, 68.0],
+          backgroundColor: ['#f87171', '#9ca3af']
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        }
+      }
+    });
+
+    // Section scores (SUS scores)
+    const sectionScoresCtx = document.getElementById('sectionScores');
+    new Chart(sectionScoresCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Citizens', 'Parish Staff', 'Overall'],
+        datasets: [{
+          label: 'SUS Score',
+          data: [57.9, 87.5, 58.6],
+          backgroundColor: ['#f87171', '#4ade80', '#f97316']
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        }
+      }
+    });
+
+    // Problem items
+    const problemItemsCtx = document.getElementById('problemItems');
+    new Chart(problemItemsCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Booking/Donation', 'Interface Consistency', 'Feature Integration', 'Frequency Desire'],
+        datasets: [{
+          label: 'SUS Score',
+          data: [49, 82.25, 71.25, 68.25],
+          backgroundColor: ['#f87171', '#4ade80', '#60a5fa', '#34d399']
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

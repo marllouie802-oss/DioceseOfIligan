@@ -1109,6 +1109,10 @@ def manage_church(request, church_id=None):
         status=ChurchStaff.STATUS_ACTIVE
     ).select_related('user', 'user__profile').order_by('-added_at')
 
+    # Get priests for Priests tab
+    from core.models import Pastor
+    priests = Pastor.objects.filter(church=church).order_by('order', 'name')
+
     ctx = {
         'active': 'manage',
         'page_title': 'Manage Church',
@@ -1192,6 +1196,7 @@ def manage_church(request, church_id=None):
         'staff_position': staff_position,  # ChurchStaff object if staff member
         'secretaries': secretaries,  # Parish Secretaries list
         'volunteers': volunteers,  # Ministry Leaders/Volunteers list
+        'priests': priests,  # Parish Priests list
     }
     ctx.update(_app_context(request))
     # Override global unread count with church-specific pending count for this page
@@ -2133,15 +2138,52 @@ def appointments(request):
     status_filter = request.GET.get('status', 'all')
     bookings_qs = Booking.objects.filter(user=request.user).select_related('service', 'service__category', 'church', 'church__owner', 'handled_by').order_by('-created_at')
 
+    # Define status buckets
+    pending_statuses = [
+        Booking.STATUS_REQUESTED, 
+        Booking.STATUS_FORM_REQUESTED, 
+        Booking.STATUS_FORM_PROVIDED, 
+        Booking.STATUS_FORM_SUBMITTED, 
+        Booking.STATUS_FORM_PROCESSING,
+        Booking.STATUS_PENDING_REQUIREMENTS
+    ]
+    
+    upcoming_statuses = [
+        Booking.STATUS_APPROVED,
+        Booking.STATUS_REVIEWED,
+        Booking.STATUS_CONFIRMED,
+        Booking.STATUS_READY_TO_SCHEDULE,
+        Booking.STATUS_RESCHEDULE,
+        Booking.STATUS_PASTOR_SELECTION,
+        Booking.STATUS_PASTOR_ASSIGNED,
+        Booking.STATUS_SCHEDULING,
+        Booking.STATUS_SCHEDULED
+    ]
+    
+    completed_statuses = [Booking.STATUS_COMPLETED]
+    
+    canceled_statuses = [Booking.STATUS_DECLINED, Booking.STATUS_CANCELED]
+
     counts = {
         'all': bookings_qs.count(),
-        Booking.STATUS_REQUESTED: bookings_qs.filter(status=Booking.STATUS_REQUESTED).count(),
-        Booking.STATUS_REVIEWED: bookings_qs.filter(status=Booking.STATUS_REVIEWED).count(),
-        Booking.STATUS_APPROVED: bookings_qs.filter(status=Booking.STATUS_APPROVED).count(),
-        Booking.STATUS_COMPLETED: bookings_qs.filter(status=Booking.STATUS_COMPLETED).count(),
+        'pending': bookings_qs.filter(status__in=pending_statuses).count(),
+        'upcoming': bookings_qs.filter(status__in=upcoming_statuses).count(),
+        'completed': bookings_qs.filter(status__in=completed_statuses).count(),
+        'canceled': bookings_qs.filter(status__in=canceled_statuses).count(),
     }
+
     if status_filter and status_filter != 'all':
-        bookings_qs = bookings_qs.filter(status=status_filter)
+        if status_filter == 'pending':
+            bookings_qs = bookings_qs.filter(status__in=pending_statuses)
+        elif status_filter == 'upcoming':
+            bookings_qs = bookings_qs.filter(status__in=upcoming_statuses)
+        elif status_filter == 'completed':
+            bookings_qs = bookings_qs.filter(status__in=completed_statuses)
+        elif status_filter == 'canceled':
+            bookings_qs = bookings_qs.filter(status__in=canceled_statuses)
+        else:
+            # Fallback for direct status access or legacy links
+            bookings_qs = bookings_qs.filter(status=status_filter)
 
     # Add review status for each booking
     bookings = list(bookings_qs)
@@ -4345,7 +4387,10 @@ def service_gallery(request, service_id):
 
 @login_required
 def book_service(request, service_id):
-    """Booking page for a specific service. Shows upcoming dates and allows submitting a request."""
+    """
+    Step 1: Request form from parish for a specific service.
+    This is the first step in the new multi-step appointment workflow.
+    """
     service = get_object_or_404(BookableService, id=service_id, is_active=True)
     church = service.church
 
@@ -4372,47 +4417,143 @@ def book_service(request, service_id):
         messages.error(request, f'Please complete your profile before requesting an appointment. Missing: {summary}.')
         return redirect('dashboard')
 
-    # Calculate date range for calendar constraints
-    from datetime import date, timedelta
-    start_date = date.today()
-    end_date = start_date + timedelta(days=service.advance_booking_days)
-
-    form = BookingForm(request.POST or None, service=service, user=request.user)
     if request.method == 'POST':
-        if form.is_valid():
-            booking = form.save()
-            
-            # Log activity
-            from .models import UserInteraction
-            UserInteraction.log_activity(
-                user=request.user,
-                activity_type=UserInteraction.ACTIVITY_BOOKING_CREATE,
-                content_object=booking,
-                metadata={
-                    'service_name': service.name,
-                    'church_name': church.name,
-                    'booking_code': booking.code,
-                    'requested_date': booking.date.isoformat()
-                },
-                request=request
-            )
-            
-            messages.success(request, f'Appointment request submitted. Your ID is {booking.code}.')
-            return HttpResponseRedirect(reverse('core:appointments'))
-        else:
-            messages.error(request, 'Please fix the errors below.')
+        form_request_notes = request.POST.get('form_request_notes', '')
+        
+        # Create booking with initial status: form_requested
+        booking = Booking.objects.create(
+            user=request.user,
+            church=church,
+            service=service,
+            form_request_notes=form_request_notes,
+            status=Booking.STATUS_FORM_REQUESTED
+        )
+        
+        # Log activity
+        from .models import UserInteraction
+        UserInteraction.log_activity(
+            user=request.user,
+            activity_type=UserInteraction.ACTIVITY_BOOKING_CREATE,
+            content_object=booking,
+            metadata={
+                'service_name': service.name,
+                'church_name': church.name,
+                'booking_code': booking.code,
+                'status': 'form_requested'
+            },
+            request=request
+        )
+        
+        messages.success(request, f'Form request submitted successfully! Your request ID is {booking.code}. The parish will review and provide you with the required form.')
+        return HttpResponseRedirect(reverse('core:appointments'))
 
     ctx = {
         'active': 'discover',
-        'page_title': f'Request Appointment - {service.name}',
+        'page_title': f'Request Form - {service.name}',
         'church': church,
         'service': service,
-        'form': form,
+    }
+    ctx.update(_app_context(request))
+    return render(request, 'core/book_service.html', ctx)
+
+
+@login_required
+def select_pastor(request, booking_id):
+    """
+    Step 4: User selects a pastor after form is approved.
+    """
+    booking = get_object_or_404(
+        Booking.objects.select_related('service', 'church'),
+        id=booking_id,
+        user=request.user
+    )
+    
+    # Check if booking is at the correct status
+    if booking.status != Booking.STATUS_FORM_APPROVED:
+        messages.error(request, 'You can only select a pastor after your form has been approved.')
+        return redirect('core:appointments')
+    
+    # Get available pastors for this church
+    from .models import Pastor
+    pastors = Pastor.objects.filter(
+        church=booking.church,
+        is_available=True
+    ).order_by('order', 'name')
+    
+    if request.method == 'POST':
+        pastor_id = request.POST.get('pastor_id')
+        if not pastor_id:
+            messages.error(request, 'Please select a pastor.')
+        else:
+            pastor = get_object_or_404(Pastor, id=pastor_id, church=booking.church)
+            booking.pastor = pastor
+            booking.status = Booking.STATUS_PASTOR_ASSIGNED
+            booking.save()
+            
+            messages.success(request, f'{pastor.full_title} has been assigned to your appointment. You can now schedule a date.')
+            return redirect('core:schedule_date', booking_id=booking.id)
+    
+    ctx = {
+        'active': 'appointments',
+        'page_title': 'Select Pastor',
+        'booking': booking,
+        'pastors': pastors,
+    }
+    ctx.update(_app_context(request))
+    return render(request, 'core/select_pastor.html', ctx)
+
+
+@login_required
+def schedule_date(request, booking_id):
+    """
+    Step 5: User schedules a date after pastor is assigned.
+    """
+    booking = get_object_or_404(
+        Booking.objects.select_related('service', 'church', 'pastor'),
+        id=booking_id,
+        user=request.user
+    )
+    
+    # Check if booking is at the correct status
+    if booking.status not in [Booking.STATUS_PASTOR_ASSIGNED, Booking.STATUS_SCHEDULING]:
+        messages.error(request, 'You can only schedule a date after a pastor has been assigned.')
+        return redirect('core:appointments')
+    
+    # Calculate date range
+    from datetime import date, timedelta
+    start_date = date.today()
+    end_date = start_date + timedelta(days=booking.service.advance_booking_days)
+    
+    if request.method == 'POST':
+        selected_date = request.POST.get('date')
+        selected_time = request.POST.get('start_time')
+        notes = request.POST.get('notes', '')
+        
+        if not selected_date or not selected_time:
+            messages.error(request, 'Please select both date and time.')
+        else:
+            from datetime import datetime
+            try:
+                booking.date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+                booking.start_time = datetime.strptime(selected_time, '%H:%M').time()
+                booking.notes = notes
+                booking.status = Booking.STATUS_SCHEDULED
+                booking.save()
+                
+                messages.success(request, f'Your appointment has been scheduled for {booking.date}. The parish will confirm your appointment shortly.')
+                return redirect('core:appointments')
+            except ValueError as e:
+                messages.error(request, f'Invalid date or time format: {str(e)}')
+    
+    ctx = {
+        'active': 'appointments',
+        'page_title': 'Schedule Date',
+        'booking': booking,
         'today': start_date,
         'max_date': end_date,
     }
     ctx.update(_app_context(request))
-    return render(request, 'core/book_service.html', ctx)
+    return render(request, 'core/schedule_date.html', ctx)
 
 
 @login_required
@@ -4540,6 +4681,10 @@ def manage_booking(request, booking_id):
                 Booking.STATUS_CANCELED: (StaffActivityLog.ACTION_CANCEL, f"Canceled booking #{booking.code} for {booking.user.get_full_name()}"),
                 Booking.STATUS_REVIEWED: (StaffActivityLog.ACTION_UPDATE, f"Reviewed booking #{booking.code} for {booking.user.get_full_name()}"),
                 Booking.STATUS_COMPLETED: (StaffActivityLog.ACTION_UPDATE, f"Marked booking #{booking.code} as completed"),
+                Booking.STATUS_SCHEDULED: (StaffActivityLog.ACTION_APPROVE, f"Approved schedule for booking #{booking.code} for {booking.user.get_full_name()}"),
+                Booking.STATUS_INTERVIEW_COMPLETED: (StaffActivityLog.ACTION_UPDATE, f"Marked interview as completed for booking #{booking.code}"),
+                Booking.STATUS_EVENT_SCHEDULED: (StaffActivityLog.ACTION_APPROVE, f"Approved event schedule for booking #{booking.code}"),
+                Booking.STATUS_RESCHEDULE: (StaffActivityLog.ACTION_UPDATE, f"Requested reschedule for booking #{booking.code}"),
             }
             if new_status in action_map:
                 action, desc = action_map[new_status]
@@ -4639,6 +4784,36 @@ def manage_booking(request, booking_id):
                         title=tmpl['title'],
                         message=tmpl['message'],
                         priority=tmpl['priority']
+                    )
+                elif new_status == Booking.STATUS_SCHEDULED:
+                    # Notify user that their schedule is approved
+                    create_booking_notification(
+                        booking=booking,
+                        notification_type=Notification.TYPE_BOOKING_APPROVED,
+                        title='Schedule Approved',
+                        message=f'Your appointment schedule for {booking.service.name} on {booking.date} has been approved.',
+                        priority='high'
+                    )
+                elif new_status == Booking.STATUS_INTERVIEW_COMPLETED:
+                    tmpl = NotificationTemplates.booking_interview_completed(booking)
+                    create_booking_notification(
+                        booking=booking,
+                        notification_type=Notification.TYPE_BOOKING_APPROVED,
+                        title=tmpl['title'],
+                        message=tmpl['message'],
+                        priority=tmpl['priority']
+                    )
+                elif new_status == Booking.STATUS_EVENT_REQUESTED:
+                    # Notify admin (already handled in schedule_event_date, but good for activity log)
+                    pass
+                elif new_status == Booking.STATUS_EVENT_SCHEDULED:
+                    # Notify user that their event schedule is approved
+                    create_booking_notification(
+                        booking=booking,
+                        notification_type=Notification.TYPE_BOOKING_APPROVED,
+                        title='Event Schedule Approved',
+                        message=f'Your event schedule for {booking.service.name} on {booking.event_date} has been approved.',
+                        priority='high'
                     )
             except Exception:
                 pass
@@ -6409,6 +6584,9 @@ def api_get_service(request, service_id):
             'id': service.id,
             'name': service.name,
             'description': service.description or 'No description provided.',
+            'requirements': service.requirements_list,
+            'preparation_notes': service.preparation_notes,
+            'cancellation_policy': service.cancellation_policy,
             'image': image_url,
             'duration': service.duration_display,
             'price': service.price_display,
@@ -10448,3 +10626,221 @@ def terms_of_service(request):
     return render(request, 'core/terms_of_service.html', {
         'today': datetime.now().date()
     })
+
+
+# ============================================================================
+# PRIEST MANAGEMENT API ENDPOINTS
+# ============================================================================
+
+@login_required
+def api_list_priests(request, church_id):
+    """Get list of priests for a church."""
+    from core.models import Pastor, ChurchStaff
+    
+    # Check permission
+    church = get_object_or_404(Church, id=church_id)
+    is_owner = church.owner == request.user
+    is_staff = ChurchStaff.objects.filter(
+        church=church, user=request.user, status=ChurchStaff.STATUS_ACTIVE
+    ).exists()
+    
+    if not is_owner and not is_staff and not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Permission denied'}, status=403)
+    
+    priests = Pastor.objects.filter(church=church).order_by('order', 'name')
+    priest_list = []
+    for p in priests:
+        priest_list.append({
+            'id': p.id,
+            'name': p.name,
+            'title': p.title,
+            'full_title': p.full_title,
+            'email': p.email or '',
+            'phone': p.phone or '',
+            'specializations': p.specializations or '',
+            'bio': p.bio or '',
+            'is_available': p.is_available,
+            'available_days': p.available_days,
+            'available_time_slots': p.available_time_slots,
+            'preparation_days': p.preparation_days,
+            'photo_url': p.photo.url if p.photo else None,
+        })
+    
+    return JsonResponse({'success': True, 'priests': priest_list})
+
+
+@login_required
+def api_get_priest(request, church_id, priest_id):
+    """Get a specific priest's details."""
+    from core.models import Pastor, ChurchStaff
+    
+    # Check permission
+    church = get_object_or_404(Church, id=church_id)
+    is_owner = church.owner == request.user
+    is_staff = ChurchStaff.objects.filter(
+        church=church, user=request.user, status=ChurchStaff.STATUS_ACTIVE
+    ).exists()
+    
+    if not is_owner and not is_staff and not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Permission denied'}, status=403)
+    
+    priest = get_object_or_404(Pastor, id=priest_id, church=church)
+    
+    return JsonResponse({
+        'success': True,
+        'priest': {
+            'id': priest.id,
+            'name': priest.name,
+            'title': priest.title,
+            'full_title': priest.full_title,
+            'email': priest.email or '',
+            'phone': priest.phone or '',
+            'specializations': priest.specializations or '',
+            'bio': priest.bio or '',
+            'is_available': priest.is_available,
+            'available_days': priest.available_days,
+            'available_time_slots': priest.available_time_slots,
+            'photo_url': priest.photo.url if priest.photo else None,
+        }
+    })
+
+
+@login_required
+def api_create_priest(request, church_id):
+    """Create a new priest for a church."""
+    from core.models import Pastor, ChurchStaff
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST required'}, status=405)
+    
+    # Check permission
+    church = get_object_or_404(Church, id=church_id)
+    is_owner = church.owner == request.user
+    is_staff = ChurchStaff.objects.filter(
+        church=church, user=request.user, 
+        role__in=[ChurchStaff.ROLE_SECRETARY],
+        status=ChurchStaff.STATUS_ACTIVE
+    ).exists()
+    
+    if not is_owner and not is_staff and not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Permission denied'}, status=403)
+    
+    name = request.POST.get('name', '').strip()
+    title = request.POST.get('title', 'Rev. Fr.').strip()
+    
+    if not name:
+        return JsonResponse({'success': False, 'message': 'Name is required'}, status=400)
+    
+    try:
+        priest = Pastor.objects.create(
+            church=church,
+            name=name,
+            title=title,
+            email=request.POST.get('email', '').strip() or None,
+            phone=request.POST.get('phone', '').strip() or None,
+            specializations=request.POST.get('specializations', '').strip(),
+            bio=request.POST.get('bio', '').strip(),
+            is_available=request.POST.get('is_available') == 'on',
+            available_days=request.POST.get('available_days', '0,1,2,3,4,5,6'),
+            available_time_slots=request.POST.get('available_time_slots', '').strip(),
+            preparation_days=int(request.POST.get('preparation_days') or 30),
+        )
+        
+        # Handle photo upload
+        if 'photo' in request.FILES:
+            priest.photo = request.FILES['photo']
+            priest.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Priest added successfully',
+            'priest_id': priest.id
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+
+@login_required
+def api_update_priest(request, church_id, priest_id):
+    """Update an existing priest."""
+    from core.models import Pastor, ChurchStaff
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST required'}, status=405)
+    
+    # Check permission
+    church = get_object_or_404(Church, id=church_id)
+    is_owner = church.owner == request.user
+    is_staff = ChurchStaff.objects.filter(
+        church=church, user=request.user, 
+        role__in=[ChurchStaff.ROLE_SECRETARY],
+        status=ChurchStaff.STATUS_ACTIVE
+    ).exists()
+    
+    if not is_owner and not is_staff and not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Permission denied'}, status=403)
+    
+    priest = get_object_or_404(Pastor, id=priest_id, church=church)
+    
+    name = request.POST.get('name', '').strip()
+    if not name:
+        return JsonResponse({'success': False, 'message': 'Name is required'}, status=400)
+    
+    try:
+        priest.name = name
+        priest.title = request.POST.get('title', 'Rev. Fr.').strip()
+        priest.email = request.POST.get('email', '').strip() or None
+        priest.phone = request.POST.get('phone', '').strip() or None
+        priest.specializations = request.POST.get('specializations', '').strip()
+        priest.bio = request.POST.get('bio', '').strip()
+        priest.is_available = request.POST.get('is_available') == 'on'
+        priest.available_days = request.POST.get('available_days', '0,1,2,3,4,5,6')
+        priest.available_time_slots = request.POST.get('available_time_slots', '').strip()
+        priest.preparation_days = int(request.POST.get('preparation_days') or 30)
+        
+        # Handle photo upload
+        if 'photo' in request.FILES:
+            priest.photo = request.FILES['photo']
+        
+        priest.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Priest updated successfully'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+
+@login_required
+def api_delete_priest(request, church_id, priest_id):
+    """Delete a priest."""
+    from core.models import Pastor, ChurchStaff
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST required'}, status=405)
+    
+    # Check permission
+    church = get_object_or_404(Church, id=church_id)
+    is_owner = church.owner == request.user
+    is_staff = ChurchStaff.objects.filter(
+        church=church, user=request.user, 
+        role__in=[ChurchStaff.ROLE_SECRETARY],
+        status=ChurchStaff.STATUS_ACTIVE
+    ).exists()
+    
+    if not is_owner and not is_staff and not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Permission denied'}, status=403)
+    
+    priest = get_object_or_404(Pastor, id=priest_id, church=church)
+    
+    try:
+        priest_name = priest.full_title
+        priest.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Priest "{priest_name}" deleted successfully'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)

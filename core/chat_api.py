@@ -561,3 +561,93 @@ def conversation_typing_status(request, conversation_id):
         return JsonResponse({'error': 'Conversation not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def send_message_to_user(request):
+    """
+    Allow a church admin/owner/secretary to send a message to a specific user.
+    Creates or gets a conversation between the target user and the church,
+    then sends a message as the admin (shown as the church).
+    
+    Expected JSON body:
+    {
+        "user_id": int,     # The target user to message
+        "church_id": int,   # The church context
+        "content": str      # The message content
+    }
+    """
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        church_id = data.get('church_id')
+        content = data.get('content', '').strip()
+
+        if not user_id or not church_id:
+            return JsonResponse({'error': 'User ID and Church ID are required'}, status=400)
+
+        if not content:
+            return JsonResponse({'error': 'Message content cannot be empty'}, status=400)
+
+        if len(content) > 1000:
+            return JsonResponse({'error': 'Message is too long (max 1000 characters)'}, status=400)
+
+        # Get the church
+        try:
+            church = Church.objects.get(id=church_id)
+        except Church.DoesNotExist:
+            return JsonResponse({'error': 'Church not found'}, status=404)
+
+        # Verify admin has permission to message on behalf of this church
+        from .models import ChurchStaff
+        is_owner = church.owner == request.user if church.owner else False
+        is_staff = ChurchStaff.objects.filter(
+            user=request.user,
+            church=church,
+            status=ChurchStaff.STATUS_ACTIVE,
+            role=ChurchStaff.ROLE_SECRETARY
+        ).exists()
+
+        if not is_owner and not is_staff:
+            return JsonResponse({'error': 'You do not have permission to send messages for this church'}, status=403)
+
+        # Get the target user
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            target_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+        # Get or create conversation between the target user and the church
+        conversation, created = Conversation.objects.get_or_create(
+            user=target_user,
+            church=church
+        )
+
+        # Send the message as the admin (will appear as from the church)
+        message = Message.objects.create(
+            conversation=conversation,
+            sender=request.user,
+            content=content
+        )
+
+        # Update conversation timestamp
+        conversation.updated_at = message.created_at
+        conversation.save(update_fields=['updated_at'])
+
+        return JsonResponse({
+            'success': True,
+            'conversation_id': conversation.id,
+            'message': {
+                'id': message.id,
+                'content': message.content,
+                'created_at': message.created_at.isoformat(),
+            }
+        }, status=201)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

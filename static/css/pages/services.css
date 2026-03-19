@@ -761,3 +761,162 @@
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }
 }
+
+/* =============================================================================
+   TIME SLOTS STYLING
+   ============================================================================= */
+
+/* Time Slots Container */
+.time-slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* Individual Time Slot Item */
+.time-slot-item {
+  background: #F8FAFF;
+  border: 2px solid #E1E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.time-slot-item:hover {
+  border-color: #3B82F6;
+  background: #F0F9FF;
+}
+
+/* Time Slot Row */
+.time-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.time-slot-row .form-control {
+  flex: 1;
+  min-width: 140px;
+}
+
+.time-slot-row .time-start,
+.time-slot-row .time-end {
+  background: white;
+  border: 2px solid #E1E8F0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #1F2937;
+  transition: all 0.3s ease;
+}
+
+.time-slot-row .time-start:focus,
+.time-slot-row .time-end:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Time Separator */
+.time-separator {
+  color: #6B7280;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  padding: 0 8px;
+}
+
+/* Remove Button */
+.time-slot-row button {
+  background: #EF4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.time-slot-row button:hover {
+  background: #DC2626;
+  transform: scale(1.05);
+}
+
+.time-slot-row button:active {
+  transform: scale(0.95);
+}
+
+/* Add Time Slot Button */
+.btn-secondary.btn-sm {
+  background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-secondary.btn-sm:hover {
+  background: linear-gradient(135deg, #4B5563 0%, #374151 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.btn-secondary.btn-sm:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design for Time Slots */
+@media (max-width: 768px) {
+  .time-slot-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .time-slot-row .form-control {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .time-separator {
+    text-align: center;
+    padding: 4px 0;
+  }
+  
+  .time-slot-row button {
+    align-self: center;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .time-slots-container {
+    gap: 8px;
+  }
+  
+  .time-slot-item {
+    padding: 12px;
+  }
+  
+  .time-slot-row .time-start,
+  .time-slot-row .time-end {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}

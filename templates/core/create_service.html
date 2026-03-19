@@ -133,6 +133,53 @@
                 <div class="form-error">{{ form.duration.errors.0 }}</div>
               {% endif %}
             </div>
+            
+            <div class="form-group">
+              <label for="{{ form.max_bookings_per_day.id_for_label }}" class="form-label">Max Bookings Per Day</label>
+              {{ form.max_bookings_per_day }}
+              <small class="form-help">Maximum number of bookings allowed per day</small>
+              {% if form.max_bookings_per_day.errors %}
+                <div class="form-error">{{ form.max_bookings_per_day.errors.0 }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.advance_booking_days.id_for_label }}" class="form-label">Advance Booking Days</label>
+              {{ form.advance_booking_days }}
+              <small class="form-help">How many days in advance users can book</small>
+              {% if form.advance_booking_days.errors %}
+                <div class="form-error">{{ form.advance_booking_days.errors.0 }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.event_preparation_days.id_for_label }}" class="form-label">Event Preparation Days</label>
+              {{ form.event_preparation_days }}
+              <small class="form-help">Minimum days needed before an event</small>
+              {% if form.event_preparation_days.errors %}
+                <div class="form-error">{{ form.event_preparation_days.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <!-- Available Time Slots -->
+          <div class="form-group form-group-full">
+            <label class="form-label">Available Time Slots</label>
+            <div id="service-time-slots-container" class="time-slots-container">
+              <div class="time-slot-item">
+                <div class="time-slot-row">
+                  <input type="time" name="service_start_time_0" class="form-control time-start" placeholder="Start">
+                  <span class="time-separator">to</span>
+                  <input type="time" name="service_end_time_0" class="form-control time-end" placeholder="End">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="removeServiceTimeSlot(0)" style="display: none;">×</button>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addServiceTimeSlot()">+ Add Time Slot</button>
+            <small class="form-help">Set the available time slots for this service (e.g., 9:00 AM - 11:00 AM)</small>
+            
+            <!-- Hidden field to store time slots data -->
+            <input type="hidden" name="available_time_slots" id="service-available-time-slots" value="">
           </div>
         </div>
 
@@ -352,6 +399,111 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
     }
+    
+    // Service Time Slots Management
+    let serviceTimeSlotCounter = 0;
+    
+    function addServiceTimeSlot() {
+      const container = document.getElementById('service-time-slots-container');
+      const slotDiv = document.createElement('div');
+      slotDiv.className = 'time-slot-item';
+      slotDiv.innerHTML = `
+        <div class="time-slot-row">
+          <input type="time" name="service_start_time_${serviceTimeSlotCounter}" class="form-control time-start" placeholder="Start">
+          <span class="time-separator">to</span>
+          <input type="time" name="service_end_time_${serviceTimeSlotCounter}" class="form-control time-end" placeholder="End">
+          <button type="button" class="btn btn-outline btn-sm" onclick="removeServiceTimeSlot(${serviceTimeSlotCounter})">×</button>
+        </div>
+      `;
+      container.appendChild(slotDiv);
+      serviceTimeSlotCounter++;
+      
+      // Update remove buttons visibility
+      updateServiceRemoveButtons();
+    }
+    
+    function removeServiceTimeSlot(index) {
+      const container = document.getElementById('service-time-slots-container');
+      const slots = container.querySelectorAll('.time-slot-item');
+      
+      if (slots.length > 1) {
+        // Find the slot with the given index and remove it
+        slots.forEach(slot => {
+          const removeBtn = slot.querySelector('button[onclick*="' + index + '"]');
+          if (removeBtn) {
+            slot.remove();
+          }
+        });
+        
+        // Update remove buttons visibility
+        updateServiceRemoveButtons();
+      }
+    }
+    
+    function updateServiceRemoveButtons() {
+      const container = document.getElementById('service-time-slots-container');
+      const slots = container.querySelectorAll('.time-slot-item');
+      const removeButtons = container.querySelectorAll('button[onclick^="removeServiceTimeSlot"]');
+      
+      // Hide remove button if only one slot, show if multiple
+      removeButtons.forEach(btn => {
+        btn.style.display = slots.length > 1 ? 'inline-block' : 'none';
+      });
+    }
+    
+    // Function to collect time slots data and update hidden field
+    function collectServiceTimeSlots() {
+      const container = document.getElementById('service-time-slots-container');
+      const slots = container.querySelectorAll('.time-slot-item');
+      const timeSlots = [];
+      
+      slots.forEach(slot => {
+        const startInput = slot.querySelector('input[name^="service_start_time_"]');
+        const endInput = slot.querySelector('input[name^="service_end_time_"]');
+        
+        if (startInput && endInput && startInput.value && endInput.value) {
+          // Convert 24-hour format to 12-hour format for storage
+          const startTime = convert24to12(startInput.value);
+          const endTime = convert24to12(endInput.value);
+          timeSlots.push(`${startTime} - ${endTime}`);
+        }
+      });
+      
+      // Update hidden field
+      const hiddenField = document.getElementById('service-available-time-slots');
+      hiddenField.value = timeSlots.join(', ');
+    }
+    
+    // Helper function to convert 24-hour time to 12-hour format
+    function convert24to12(time24) {
+      if (!time24) return '';
+      
+      const [hours, minutes] = time24.split(':');
+      let h = parseInt(hours);
+      const m = minutes;
+      let period = 'AM';
+      
+      if (h >= 12) {
+        period = 'PM';
+        if (h > 12) h -= 12;
+      } else if (h === 0) {
+        h = 12;
+      }
+      
+      return `${h}:${m} ${period}`;
+    }
+    
+    // Add event listeners to time inputs to update hidden field
+    document.addEventListener('DOMContentLoaded', function() {
+      const container = document.getElementById('service-time-slots-container');
+      if (container) {
+        container.addEventListener('input', function(e) {
+          if (e.target.classList.contains('time-start') || e.target.classList.contains('time-end')) {
+            collectServiceTimeSlots();
+          }
+        });
+      }
+    });
     
     // Handle form submission
     form.addEventListener('submit', function(e) {

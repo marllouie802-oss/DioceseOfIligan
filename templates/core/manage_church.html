@@ -58,6 +58,9 @@
         {# Availability Tab #}
         {% include 'partials/manage/availability_tab.html' with church=church %}
 
+        {# Priests Tab #}
+        {% include 'partials/manage/priests_tab.html' with church=church %}
+
         {# Events Tab #}
         {% include 'partials/manage/events_tab.html' with event_posts=event_posts event_posts_count=event_posts_count follower_count=follower_count church=church %}
 

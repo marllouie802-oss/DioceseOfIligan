@@ -462,13 +462,16 @@ class BookableService(models.Model):
     duration = models.PositiveIntegerField(choices=DURATION_CHOICES, default=60, help_text="Service duration in minutes")
     max_bookings_per_day = models.PositiveIntegerField(default=10, help_text="Maximum number of bookings per day")
     advance_booking_days = models.PositiveIntegerField(default=30, help_text="How many days in advance can this be booked")
+    event_preparation_days = models.PositiveIntegerField(default=30, help_text="Minimum days from today before an event can be scheduled (preparation time)")
     
     # Availability
+    available_time_slots = models.CharField(max_length=500, blank=True, help_text="Comma-separated time slots (e.g., 9:00 AM - 11:00 AM, 1:00 PM - 4:00 PM)")
     is_active = models.BooleanField(default=True, help_text="Whether this service is available for booking")
     requires_approval = models.BooleanField(default=False, help_text="Whether bookings require church approval")
     
     # Instructions
     preparation_notes = models.TextField(blank=True, help_text="Notes for people booking this service")
+    requirements = models.TextField(blank=True, help_text="List of requirements needed for this service")
     cancellation_policy = models.TextField(blank=True, help_text="Cancellation policy for this service")
     
     # Timestamps
@@ -505,6 +508,13 @@ class BookableService(models.Model):
             return f"{self.currency} {self.price:,.2f}"
         else:
             return "Price not set"
+
+    @property
+    def requirements_list(self):
+        """Return requirements as a list of strings for bullet points."""
+        if not self.requirements:
+            return []
+        return [req.strip() for req in self.requirements.split('\n') if req.strip()]
     
     def get_images(self):
         """Get all images for this service."""
@@ -678,32 +688,167 @@ class DeclineReason(models.Model):
         return self.label
 
 
+class Pastor(models.Model):
+    """Model for pastors/ministers available for services in a parish."""
+    
+    church = models.ForeignKey(Church, on_delete=models.CASCADE, related_name='pastors')
+    name = models.CharField(max_length=200, help_text="Pastor's full name")
+    title = models.CharField(max_length=100, default='Rev. Fr.', help_text="Title (e.g., Rev. Fr., Deacon, Minister)")
+    email = models.EmailField(blank=True, null=True, help_text="Pastor's email")
+    phone = models.CharField(
+        max_length=20,
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$', 'Enter a valid phone number.')],
+        blank=True,
+        null=True,
+        help_text="Pastor's phone number"
+    )
+    photo = models.ImageField(upload_to='pastors/photos/', null=True, blank=True, help_text="Pastor's photo")
+    bio = models.TextField(blank=True, help_text="Brief biography or description")
+    specializations = models.TextField(blank=True, help_text="Specializations or services they handle (e.g., Baptism, Wedding, Counseling)")
+    is_available = models.BooleanField(default=True, help_text="Whether this pastor is currently available for bookings")
+    available_days = models.CharField(
+        max_length=20, 
+        default='0,1,2,3,4,5,6',
+        help_text="Comma-separated days of week (0=Mon, 6=Sun) when available"
+    )
+    preparation_days = models.PositiveIntegerField(
+        default=30, 
+        help_text="Number of days the priest needs to prepare before an event"
+    )
+    available_time_slots = models.CharField(
+        max_length=500,
+        blank=True,
+        help_text="Comma-separated time slots (e.g., 9:00 AM - 11:00 AM, 1:00 PM - 4:00 PM)"
+    )
+    order = models.PositiveIntegerField(default=0, help_text="Display order (0 = first)")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'name']
+        verbose_name = "Pastor"
+        verbose_name_plural = "Pastors"
+    
+    def __str__(self):
+        return f"{self.title} {self.name} - {self.church.name}"
+    
+    @property
+    def full_title(self):
+        """Return full title with name."""
+        return f"{self.title} {self.name}"
+
+    @property
+    def display_availability(self):
+        """Return human-readable available days."""
+        if not self.available_days: return "None"
+        days = sorted([d.strip() for d in self.available_days.split(',') if d.strip()])
+        if len(days) == 7: return "Every Day"
+        
+        weekdays = {'0','1','2','3','4'}
+        if set(days) == weekdays: return "Weekdays"
+        
+        weekends = {'5','6'}
+        if set(days) == weekends: return "Weekends"
+
+        days_map = {'0':'Mon','1':'Tue','2':'Wed','3':'Thu','4':'Fri','5':'Sat','6':'Sun'}
+        labels = [days_map.get(d, '') for d in days]
+        return ", ".join(filter(None, labels))
+
+    def is_available_on(self, check_date):
+        """Check if pastor is available on a specific date."""
+        if not self.is_available: return False
+        if not self.available_days: return False 
+        day_str = str(check_date.weekday())
+        return day_str in self.available_days.split(',')
+
+
 class Booking(models.Model):
-    """Model for service booking/appointment requests."""
-    STATUS_REQUESTED = 'requested'
-    STATUS_REVIEWED = 'reviewed'
-    STATUS_APPROVED = 'approved'
+    """Model for service booking/appointment requests with multi-step workflow."""
+    
+    # New workflow statuses
+    STATUS_FORM_REQUESTED = 'form_requested'
+    STATUS_FORM_PROVIDED = 'form_provided'
+    STATUS_FORM_SUBMITTED = 'form_submitted'
+    STATUS_FORM_PROCESSING = 'form_processing'
+    STATUS_FORM_APPROVED = 'form_approved'
+    STATUS_PASTOR_SELECTION = 'pastor_selection'
+    STATUS_PASTOR_ASSIGNED = 'pastor_assigned'
+    STATUS_SCHEDULING = 'scheduling'
+    STATUS_SCHEDULE_REQUESTED = 'schedule_requested'  # User requested a date/time
+    STATUS_SCHEDULED = 'scheduled'  # Scheduled for priest interview
+    STATUS_INTERVIEW_COMPLETED = 'interview_completed'  # Priest interview done
+    STATUS_EVENT_REQUESTED = 'event_requested'  # User requested event date
+    STATUS_EVENT_SCHEDULED = 'event_scheduled'  # Event date set/approved
+    STATUS_CONFIRMED = 'confirmed'
     STATUS_COMPLETED = 'completed'
     STATUS_DECLINED = 'declined'
     STATUS_CANCELED = 'canceled'
+    STATUS_RESCHEDULE = 'reschedule'
+
+    STATUS_PENDING_REQUIREMENTS = 'pending_requirements'
+    STATUS_READY_TO_SCHEDULE = 'ready_to_schedule'
+
+    # Legacy workflow statuses (backward compatibility)
+    STATUS_REQUESTED = 'requested'
+    STATUS_REVIEWED = 'reviewed'
+    STATUS_APPROVED = 'approved'
+    
     STATUS_CHOICES = [
+        (STATUS_FORM_REQUESTED, 'Form Requested'),
+        (STATUS_FORM_PROVIDED, 'Form Provided by Parish'),
+        (STATUS_FORM_SUBMITTED, 'Form Submitted'),
+        (STATUS_FORM_PROCESSING, 'Processing Form'),
+        (STATUS_FORM_APPROVED, 'Form Approved'),
+        (STATUS_PENDING_REQUIREMENTS, 'Pending Requirements'),
+        (STATUS_READY_TO_SCHEDULE, 'Ready to Schedule'),
+        (STATUS_PASTOR_SELECTION, 'Select Pastor'),
+        (STATUS_PASTOR_ASSIGNED, 'Pastor Assigned'),
+        (STATUS_SCHEDULING, 'Schedule Date'),
+        (STATUS_SCHEDULE_REQUESTED, 'Schedule Requested'),
+        (STATUS_SCHEDULED, 'Interview Scheduled'),
+        (STATUS_INTERVIEW_COMPLETED, 'Interview Completed'),
+        (STATUS_EVENT_REQUESTED, 'Event Requested'),
+        (STATUS_EVENT_SCHEDULED, 'Event Scheduled'),
+        (STATUS_CONFIRMED, 'Confirmed'),
+        (STATUS_COMPLETED, 'Completed'),
         (STATUS_REQUESTED, 'Requested'),
         (STATUS_REVIEWED, 'Reviewed'),
         (STATUS_APPROVED, 'Approved'),
-        (STATUS_COMPLETED, 'Completed'),
         (STATUS_DECLINED, 'Declined'),
         (STATUS_CANCELED, 'Canceled'),
+        (STATUS_RESCHEDULE, 'Reschedule Required'),
     ]
 
     code = models.CharField(max_length=20, unique=True, blank=True, help_text="Human-readable appointment ID e.g., APPT-0001")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
     church = models.ForeignKey(Church, on_delete=models.CASCADE, related_name='bookings')
     service = models.ForeignKey(BookableService, on_delete=models.CASCADE, related_name='bookings')
-    date = models.DateField(help_text="Requested date")
-    start_time = models.TimeField(null=True, blank=True, help_text="Optional start time (slots to be implemented)")
-    end_time = models.TimeField(null=True, blank=True, help_text="Optional end time")
-    notes = models.TextField(blank=True, help_text="Notes provided by requester")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_REQUESTED)
+    
+    # Pastor assignment (new field)
+    pastor = models.ForeignKey(Pastor, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings', help_text="Assigned pastor for this service")
+    
+    # Form-related fields (new)
+    form_request_notes = models.TextField(blank=True, help_text="Initial notes when requesting the form")
+    form_provided_at = models.DateTimeField(null=True, blank=True, help_text="When the parish provided the form")
+    form_submitted_at = models.DateTimeField(null=True, blank=True, help_text="When user submitted the filled form")
+    form_documents = models.TextField(blank=True, help_text="JSON or text describing submitted documents")
+    form_approval_notes = models.TextField(blank=True, help_text="Notes from parish when approving/processing form")
+    
+    # Scheduling fields (updated)
+    date = models.DateField(null=True, blank=True, help_text="Scheduled date (Priest Interview)")
+    start_time = models.TimeField(null=True, blank=True, help_text="Scheduled start time")
+    time_slot = models.CharField(max_length=100, blank=True, null=True, help_text="Selected time slot (e.g., 1pm - 4pm)")
+    end_time = models.TimeField(null=True, blank=True, help_text="Scheduled end time")
+    
+    # Event details (Two-step scheduling)
+    event_date = models.DateField(null=True, blank=True, help_text="Date of the actual event (e.g., Wedding)")
+    event_time = models.TimeField(null=True, blank=True, help_text="Time of the actual event")
+    event_time_slot = models.CharField(max_length=100, blank=True, null=True, help_text="Selected event time slot")
+    
+    # General notes
+    notes = models.TextField(blank=True, help_text="Additional notes")
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default=STATUS_FORM_REQUESTED)
     cancel_reason = models.CharField(max_length=200, blank=True, help_text="Reason when canceled/auto-canceled")
     decline_reason = models.CharField(max_length=200, blank=True, help_text="Reason when declined")
     handled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='handled_bookings', help_text="Parish administrator who handled this booking")

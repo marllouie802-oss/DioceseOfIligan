@@ -1,0 +1,100 @@
+{% extends 'layouts/app_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm border-0 rounded-lg">
+        <div class="card-header bg-primary text-white p-4">
+            <h2 class="mb-0">Select a Priest/Minister</h2>
+            <p class="mb-0 opacity-75">Step 4 of your appointment for {{ booking.service.name }}</p>
+        </div>
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>Appointment ID:</strong> {{ booking.code }}</p>
+                    <p><strong>Church:</strong> {{ booking.church.name }}</p>
+                </div>
+            </div>
+
+            <form method="post" id="pastorSelectForm">
+                {% csrf_token %}
+                <div class="row g-4">
+                    {% for p in pastors %}
+                    <div class="col-md-4">
+                        <label class="pastor-card-label w-100 h-100 m-0">
+                            <input type="radio" name="pastor_id" value="{{ p.id }}" class="d-none" required>
+                            <div class="pastor-card text-center p-4 h-100 border rounded-lg transition-all"
+                                style="cursor: pointer;">
+                                <div class="avatar-circle mb-3 mx-auto"
+                                    style="width: 100px; height: 100px; overflow: hidden; border-radius: 50%;">
+                                    {% if p.photo %}
+                                    <img src="{{ p.photo.url }}" class="img-fluid w-100 h-100 object-fit-cover"
+                                        alt="{{ p.name }}">
+                                    {% else %}
+                                    <div
+                                        class="w-100 h-100 bg-light d-flex align-items-center justify-content-center text-secondary">
+                                        <i data-feather="user" style="width: 48px; height: 48px;"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <h4 class="mb-1">{{ p.full_title }}</h4>
+                                <p class="text-muted small mb-2">{{ p.title }}</p>
+                                {% if p.specializations %}
+                                <div class="mb-2">
+                                    <span class="badge bg-light text-dark border">{{ p.specializations }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="availability-info mt-3 py-2 border-top">
+                                    <small class="text-primary font-weight-bold">
+                                        <i data-feather="calendar"
+                                            style="width: 12px; height: 12px; margin-right: 4px;"></i>
+                                        {{ p.display_availability|default:"Available" }}
+                                    </small>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <p class="lead text-muted">No priests are currently available for this church.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-5 d-flex justify-content-between">
+                    <a href="{% url 'core:appointments' %}" class="btn btn-outline-secondary">Back to Appointments</a>
+                    <button type="submit" class="btn btn-primary px-5 py-2 font-weight-bold">Confirm Selection &
+                        Continue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pastor-card {
+        border-width: 2px !important;
+        transition: all 0.3s ease;
+    }
+
+    .pastor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        border-color: #3B82F6 !important;
+    }
+
+    input[type="radio"]:checked+.pastor-card {
+        border-color: #3B82F6 !important;
+        background-color: #F0F9FF !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    });
+</script>
+{% endblock %}

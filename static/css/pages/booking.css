@@ -19,14 +19,14 @@
 .page-header {
   margin-bottom: 32px;
   padding: 24px;
-  background: 
+  background:
     radial-gradient(ellipse 120px 80px at 25% 30%, rgba(30, 144, 255, 0.06) 0%, transparent 70%),
     radial-gradient(ellipse 100px 60px at 75% 70%, rgba(30, 144, 255, 0.04) 0%, transparent 75%),
     repeating-linear-gradient(45deg, rgba(30, 144, 255, 0.02) 0.5px, transparent 2px),
     repeating-linear-gradient(-45deg, rgba(30, 144, 255, 0.02) 0.5px, transparent 2px),
     linear-gradient(135deg, #FFFFFF 0%, #F7FBFF 50%, #FFFFFF 100%);
   border-radius: 20px;
-  box-shadow: 
+  box-shadow:
     0 20px 40px rgba(30, 144, 255, 0.12),
     0 10px 20px rgba(30, 144, 255, 0.08),
     0 5px 10px rgba(30, 144, 255, 0.06),
@@ -53,7 +53,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 
+  box-shadow:
     0 8px 16px rgba(30, 144, 255, 0.15),
     0 4px 8px rgba(30, 144, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -115,7 +115,7 @@
    ============================================================================= */
 
 .card {
-  background: 
+  background:
     /* Subtle texture */
     radial-gradient(ellipse 120px 80px at 25% 30%, rgba(30, 144, 255, 0.06) 0%, transparent 70%),
     radial-gradient(ellipse 100px 60px at 75% 70%, rgba(30, 144, 255, 0.04) 0%, transparent 75%),
@@ -124,15 +124,15 @@
     repeating-linear-gradient(-45deg, rgba(30, 144, 255, 0.02) 0.5px, transparent 2px),
     /* Base gradient */
     linear-gradient(135deg, #FFFFFF 0%, #F7FBFF 50%, #FFFFFF 100%);
-  
+
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 
+  box-shadow:
     0 20px 40px rgba(30, 144, 255, 0.12),
     0 10px 20px rgba(30, 144, 255, 0.08),
     0 5px 10px rgba(30, 144, 255, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  
+
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 2px solid rgba(30, 144, 255, 0.1);
@@ -153,7 +153,7 @@
   z-index: 1;
 }
 
-.card > * {
+.card>* {
   position: relative;
   z-index: 2;
 }
@@ -200,14 +200,13 @@
 hr {
   border: none;
   height: 2px;
-  background: 
-    linear-gradient(90deg, 
-      transparent 0%, 
-      rgba(30, 144, 255, 0.2) 20%, 
-      rgba(30, 144, 255, 0.3) 50%, 
-      rgba(30, 144, 255, 0.2) 80%, 
-      transparent 100%
-    );
+  background:
+    linear-gradient(90deg,
+      transparent 0%,
+      rgba(30, 144, 255, 0.2) 20%,
+      rgba(30, 144, 255, 0.3) 50%,
+      rgba(30, 144, 255, 0.2) 80%,
+      transparent 100%);
   margin: 20px 0;
   border-radius: 1px;
 }
@@ -230,61 +229,71 @@ hr {
 }
 
 .badge.requested {
-  background: 
+  background:
     linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
   color: #92400E;
   border-color: rgba(245, 158, 11, 0.3);
-  box-shadow: 
+  box-shadow:
     0 2px 4px rgba(245, 158, 11, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .badge.reviewed {
-  background: 
+  background:
     linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
   color: #3730A3;
   border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 
+  box-shadow:
     0 2px 4px rgba(99, 102, 241, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .badge.approved {
-  background: 
+  background:
     linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
   color: #065F46;
   border-color: rgba(34, 197, 94, 0.3);
-  box-shadow: 
+  box-shadow:
     0 2px 4px rgba(34, 197, 94, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .badge.completed {
-  background: 
+  background:
     linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
   color: #111827;
   border-color: rgba(107, 114, 128, 0.3);
-  box-shadow: 
+  box-shadow:
     0 2px 4px rgba(107, 114, 128, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .badge.declined {
-  background: 
+  background:
     linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
   color: #991B1B;
   border-color: rgba(239, 68, 68, 0.3);
-  box-shadow: 
+  box-shadow:
     0 2px 4px rgba(239, 68, 68, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
+.badge.reschedule {
+  background:
+    linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  color: #B45309;
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow:
+    0 2px 4px rgba(245, 158, 11, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
 .badge.canceled {
-  background: 
+  background:
     linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
   color: #6B7280;
   border-color: rgba(156, 163, 175, 0.3);
-  box-shadow: 
+  box-shadow:
     0 2px 4px rgba(156, 163, 175, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
@@ -303,14 +312,14 @@ hr {
   color: #1A3A52;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
-  
-  background: 
+
+  background:
     /* Subtle texture */
     repeating-linear-gradient(45deg, rgba(30, 144, 255, 0.03) 0.5px, transparent 2px),
     /* Light blue gradient */
     linear-gradient(135deg, #F7F9FC 0%, #F0F8FF 100%);
-  
-  box-shadow: 
+
+  box-shadow:
     0 2px 4px rgba(30, 144, 255, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
@@ -319,15 +328,15 @@ hr {
 .form-input:focus {
   outline: none;
   border-color: #1E90FF;
-  box-shadow: 
+  box-shadow:
     0 0 0 4px rgba(30, 144, 255, 0.15),
     0 4px 12px rgba(30, 144, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  
-  background: 
+
+  background:
     repeating-linear-gradient(45deg, rgba(30, 144, 255, 0.02) 0.5px, transparent 2px),
     linear-gradient(135deg, #F0F8FF 0%, #E6F3FF 100%);
-  
+
   transform: translateY(-1px);
 }
 
@@ -353,56 +362,56 @@ hr {
 }
 
 .btn-primary {
-  background: 
+  background:
     /* Subtle overlay */
     repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0.5px, transparent 2px),
     /* Blue gradient */
     linear-gradient(135deg, #1E90FF 0%, #4169E1 50%, #4A9EFF 100%);
-  
+
   color: #FFFFFF;
   border: 2px solid rgba(30, 144, 255, 0.2);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  
-  box-shadow: 
+
+  box-shadow:
     0 6px 12px rgba(30, 144, 255, 0.15),
     0 3px 6px rgba(30, 144, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary:hover {
-  background: 
+  background:
     repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0.5px, transparent 2px),
     linear-gradient(135deg, #4A9EFF 0%, #1E90FF 50%, #4169E1 100%);
-  
+
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 8px 16px rgba(30, 144, 255, 0.2),
     0 4px 8px rgba(30, 144, 255, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .btn-secondary {
-  background: 
+  background:
     /* Subtle texture */
     repeating-linear-gradient(45deg, rgba(30, 144, 255, 0.03) 0.5px, transparent 2px),
     linear-gradient(135deg, #F7F9FC 0%, #F0F8FF 100%);
-  
+
   color: #1A3A52;
   border: 2px solid rgba(30, 144, 255, 0.2);
-  
-  box-shadow: 
+
+  box-shadow:
     0 4px 8px rgba(30, 144, 255, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-secondary:hover {
-  background: 
+  background:
     repeating-linear-gradient(45deg, rgba(30, 144, 255, 0.02) 0.5px, transparent 2px),
     linear-gradient(135deg, #F0F8FF 0%, #E6F3FF 100%);
-  
+
   border-color: rgba(30, 144, 255, 0.3);
   transform: translateY(-1px);
-  box-shadow: 
+  box-shadow:
     0 6px 12px rgba(30, 144, 255, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
@@ -411,18 +420,18 @@ hr {
   background: transparent;
   color: #1E90FF;
   border: 2px solid rgba(30, 144, 255, 0.3);
-  
-  box-shadow: 
+
+  box-shadow:
     0 2px 4px rgba(30, 144, 255, 0.06);
 }
 
 .btn-outline:hover {
-  background: 
+  background:
     linear-gradient(135deg, rgba(240, 248, 255, 0.4) 0%, rgba(232, 244, 255, 0.2) 100%);
   border-color: #1E90FF;
   color: #1A3A52;
   transform: translateY(-1px);
-  box-shadow: 
+  box-shadow:
     0 4px 8px rgba(30, 144, 255, 0.1);
 }
 
@@ -461,56 +470,57 @@ hr {
    ============================================================================= */
 
 @media (max-width: 768px) {
+
   .manage-booking-page,
   .booking-invoice-page {
     padding: 16px;
   }
-  
+
   .page-header {
     padding: 20px;
     border-radius: 16px;
   }
-  
+
   .header-content {
     flex-direction: column;
     text-align: center;
     gap: 16px;
     flex-wrap: wrap;
   }
-  
+
   .header-actions {
     width: 100%;
   }
-  
+
   .btn {
     width: 100%;
     justify-content: center;
   }
-  
+
   .card {
     padding: 20px;
     border-radius: 16px;
   }
-  
+
   .row {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .label {
     width: auto;
     font-weight: 700;
     color: #1A3A52;
   }
-  
+
   .page-title {
     font-size: 24px;
   }
-  
+
   .page-subtitle {
     font-size: 15px;
   }
-  
+
   .two-col {
     gap: 16px;
   }
@@ -521,21 +531,21 @@ hr {
     padding: 16px;
     border-radius: 14px;
   }
-  
+
   .header-icon {
     width: 40px;
     height: 40px;
   }
-  
+
   .header-icon svg {
     width: 20px;
     height: 20px;
   }
-  
+
   .section-title {
     font-size: 16px;
   }
-  
+
   .badge {
     padding: 4px 8px;
     font-size: 11px;
@@ -549,7 +559,7 @@ hr {
 .row:has(.badge) {
   align-items: center;
   justify-content: space-between;
-  background: 
+  background:
     linear-gradient(135deg, rgba(240, 248, 255, 0.3) 0%, rgba(232, 244, 255, 0.2) 100%);
   padding: 16px;
   border-radius: 12px;
@@ -557,10 +567,10 @@ hr {
   margin: 16px 0;
 }
 
-.row:has(.badge) > div:first-child {
+.row:has(.badge)>div:first-child {
   flex: 1;
 }
 
-.row:has(.badge) > div:last-child {
+.row:has(.badge)>div:last-child {
   flex-shrink: 0;
 }

@@ -1,0 +1,95 @@
+{% extends 'layouts/app_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm border-0 rounded-lg">
+        <div class="card-header bg-primary text-white p-4">
+            <h2 class="mb-0">Choose Date and Time</h2>
+            <p class="mb-0 opacity-75">Step 5 of your appointment for {{ booking.service.name }}</p>
+        </div>
+        <div class="card-body p-4">
+            <div class="row mb-4 p-3 bg-light rounded">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Appointment ID:</strong> {{ booking.code }}</p>
+                    <p class="mb-1"><strong>Assigned Priest:</strong> {{ booking.pastor.full_title|default:"Any
+                        available" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Church:</strong> {{ booking.church.name }}</p>
+                    <p class="mb-1"><strong>Service:</strong> {{ booking.service.name }}</p>
+                </div>
+            </div>
+
+            <form method="post" id="scheduleDateForm">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="form-group mb-4">
+                            <label for="date" class="form-label font-weight-bold">Select Date *</label>
+                            <input type="date" name="date" id="date" class="form-control form-control-lg"
+                                min="{{ today|date:'Y-m-d' }}" max="{{ max_date|date:'Y-m-d' }}" required>
+                            <small class="text-muted">Available dates based on church schedule</small>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="form-label font-weight-bold">Select Time *</label>
+                            <div class="time-picker-container p-3 border rounded">
+                                <input type="time" name="start_time" id="start_time" class="form-control" required>
+                                <div class="mt-2 text-muted small">
+                                    <i data-feather="info" style="width: 12px; height: 12px;"></i>
+                                    Church office hours: 8:00 AM - 5:00 PM
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="notes" class="form-label font-weight-bold">Additional Notes</label>
+                            <textarea name="notes" id="notes" class="form-textarea w-100" rows="4"
+                                placeholder="Any specific requests or information?">{{ booking.notes }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="p-4 bg-primary text-white rounded-lg h-100">
+                            <h3><i data-feather="check-square" class="mr-2"></i> Important Information</h3>
+                            <ul class="mt-4 list-unstyled">
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i data-feather="alert-circle" class="mr-2 mt-1" style="flex-shrink:0;"></i>
+                                    <span>Please arrive 15 minutes before your scheduled time.</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i data-feather="file-text" class="mr-2 mt-1" style="flex-shrink:0;"></i>
+                                    <span>Bring all necessary requirements mentioned in the appointment details.</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i data-feather="phone" class="mr-2 mt-1" style="flex-shrink:0;"></i>
+                                    <span>If you need to reschedule, please notify the parish at least 24 hours in
+                                        advance.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 d-flex justify-content-between pt-4 border-top">
+                    <a href="{% url 'core:appointments' %}" class="btn btn-outline-secondary">Return to My
+                        Appointments</a>
+                    <button type="submit" class="btn btn-primary btn-lg px-5">Schedule Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+
+        // Auto-focus the date input
+        document.getElementById('date').focus();
+    });
+</script>
+{% endblock %}

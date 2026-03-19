@@ -36,10 +36,10 @@
     <div class="party-name">{{ booking.user.get_full_name|default:booking.user.username }}</div>
     <div class="party-detail">{{ booking.user.email }}</div>
     {% if booking.user.profile.phone %}
-      <div class="party-detail">{{ booking.user.profile.phone }}</div>
+    <div class="party-detail">{{ booking.user.profile.phone }}</div>
     {% endif %}
     {% if booking.user.profile.full_address %}
-      <div class="party-detail">{{ booking.user.profile.full_address }}</div>
+    <div class="party-detail">{{ booking.user.profile.full_address }}</div>
     {% endif %}
   </div>
 </div>
@@ -58,8 +58,33 @@
     </tr>
     <tr>
       <td class="detail-label">Appointment Time:</td>
-      <td class="detail-value">{% if booking.start_time and booking.end_time %}{{ booking.start_time|time:'g:i A' }} - {{ booking.end_time|time:'g:i A' }}{% else %}To be scheduled{% endif %}</td>
+      <td class="detail-value">
+        {% if booking.start_time %}{{ booking.start_time|time:'g:i A' }}{% if booking.end_time %} - {{
+        booking.end_time|time:'g:i A' }}{% endif %}
+        {% elif booking.time_slot %}{{ booking.time_slot }}
+        {% else %}To be scheduled{% endif %}
+      </td>
     </tr>
+    {% if booking.pastor %}
+    <tr>
+      <td class="detail-label">Priest/Minister:</td>
+      <td class="detail-value">{{ booking.pastor.full_title }}</td>
+    </tr>
+    {% endif %}
+    {% if booking.event_date %}
+    <tr>
+      <td class="detail-label" style="color: #DB2777;">Event Date:</td>
+      <td class="detail-value" style="font-weight: 700; color: #DB2777;">{{ booking.event_date|date:'l, F j, Y' }}</td>
+    </tr>
+    <tr>
+      <td class="detail-label" style="color: #DB2777;">Event Time:</td>
+      <td class="detail-value" style="color: #DB2777;">
+        {% if booking.event_time %}{{ booking.event_time|time:'g:i A' }}
+        {% elif booking.event_time_slot %}{{ booking.event_time_slot }}
+        {% endif %}
+      </td>
+    </tr>
+    {% endif %}
   </table>
 </div>
 
@@ -71,17 +96,17 @@
       <td class="detail-label">Payment Status:</td>
       <td class="detail-value">
         {% if booking.payment_status == 'paid' %}
-          <span style="color:#16a34a; font-weight:600;">✓ Paid</span>
+        <span style="color:#16a34a; font-weight:600;">✓ Paid</span>
         {% elif booking.payment_status == 'pending' %}
-          <span style="color:#ca8a04; font-weight:600;">⏳ Pending</span>
+        <span style="color:#ca8a04; font-weight:600;">⏳ Pending</span>
         {% elif booking.payment_status == 'failed' %}
-          <span style="color:#dc2626; font-weight:600;">✗ Failed</span>
+        <span style="color:#dc2626; font-weight:600;">✗ Failed</span>
         {% elif booking.payment_status == 'canceled' %}
-          <span style="color:#6b7280; font-weight:600;">✗ Canceled</span>
+        <span style="color:#6b7280; font-weight:600;">✗ Canceled</span>
         {% elif booking.payment_status == 'refunded' %}
-          <span style="color:#3b82f6; font-weight:600;">↩ Refunded</span>
+        <span style="color:#3b82f6; font-weight:600;">↩ Refunded</span>
         {% else %}
-          {{ booking.get_payment_status_display }}
+        {{ booking.get_payment_status_display }}
         {% endif %}
       </td>
     </tr>
@@ -90,38 +115,40 @@
       <td class="detail-value">₱{{ booking.payment_amount|default:"0.00"|floatformat:2 }}</td>
     </tr>
     {% if booking.payment_status == 'paid' %}
-      {% if booking.payment_method %}
-        <tr>
-          <td class="detail-label">Payment Method:</td>
-          <td class="detail-value">{{ booking.get_payment_method_display }}</td>
-        </tr>
-      {% endif %}
-      {% if booking.payment_date %}
-        <tr>
-          <td class="detail-label">Payment Date:</td>
-          <td class="detail-value">{{ booking.payment_date|date:'M j, Y g:i A' }}</td>
-        </tr>
-      {% endif %}
-      {% if booking.payment_transaction_id %}
-        <tr>
-          <td class="detail-label">Transaction ID:</td>
-          <td class="detail-value" style="font-family: monospace; font-size: 12px;">{{ booking.payment_transaction_id }}</td>
-        </tr>
-      {% endif %}
+    {% if booking.payment_method %}
+    <tr>
+      <td class="detail-label">Payment Method:</td>
+      <td class="detail-value">{{ booking.get_payment_method_display }}</td>
+    </tr>
+    {% endif %}
+    {% if booking.payment_date %}
+    <tr>
+      <td class="detail-label">Payment Date:</td>
+      <td class="detail-value">{{ booking.payment_date|date:'M j, Y g:i A' }}</td>
+    </tr>
+    {% endif %}
+    {% if booking.payment_transaction_id %}
+    <tr>
+      <td class="detail-label">Transaction ID:</td>
+      <td class="detail-value" style="font-family: monospace; font-size: 12px;">{{ booking.payment_transaction_id }}
+      </td>
+    </tr>
+    {% endif %}
     {% endif %}
   </table>
 </div>
 
 <!-- Notes Section -->
 {% if booking.notes %}
-  <div class="invoice-notes">
-    <h3 class="section-title">ADDITIONAL NOTES</h3>
-    <p class="notes-content">{{ booking.notes }}</p>
-  </div>
+<div class="invoice-notes">
+  <h3 class="section-title">ADDITIONAL NOTES</h3>
+  <p class="notes-content">{{ booking.notes }}</p>
+</div>
 {% endif %}
 
 <!-- Signature Section -->
-<div class="signature-section" style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #e5e7eb; page-break-inside: avoid;">
+<div class="signature-section"
+  style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #e5e7eb; page-break-inside: avoid;">
   <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: flex-end;">
     <div style="text-align: center;">
       <div style="border-bottom: 2px solid #000; height: 35px; margin-bottom: 5px;"></div>
@@ -129,16 +156,17 @@
         Parish Administrator Signature
       </div>
     </div>
-    
+
     <div style="text-align: center;">
       <div style="border-bottom: 2px solid #000; height: 35px; margin-bottom: 5px;"></div>
       <div style="font-size: 9px; color: #374151; font-weight: 600;">
         Date
       </div>
     </div>
-    
+
     <div style="text-align: center;">
-      <div style="border: 2px solid #000; height: 50px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #9ca3af; background: #fafafa;">
+      <div
+        style="border: 2px solid #000; height: 50px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #9ca3af; background: #fafafa;">
         Parish Seal
       </div>
       <div style="font-size: 9px; color: #374151; font-weight: 600;">
@@ -150,6 +178,8 @@
 
 <!-- Footer Note -->
 <div class="invoice-footer-note" style="margin-top: 12px;">
-  <p style="margin: 1px 0; font-size: 8px;">This is an automated appointment confirmation. Please keep this for your records.</p>
-  <p style="margin: 1px 0; font-size: 8px;">For any inquiries, please contact the church directly using the information provided above.</p>
+  <p style="margin: 1px 0; font-size: 8px;">This is an automated appointment confirmation. Please keep this for your
+    records.</p>
+  <p style="margin: 1px 0; font-size: 8px;">For any inquiries, please contact the church directly using the information
+    provided above.</p>
 </div>

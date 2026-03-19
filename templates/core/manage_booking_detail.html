@@ -9,272 +9,1041 @@
 <link rel="stylesheet" href="{% static 'css/my_appointments.css' %}?v={{ STATIC_VERSION }}">
 <link rel="stylesheet" href="{% static 'css/pages/appointments.css' %}?v={{ STATIC_VERSION }}">
 <style>
-  #invoiceModal.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    align-items: center;
-    justify-content: center;
-    z-index: 10000 !important;
-  }
-  
-  #invoiceModal.modal-overlay[style*="display: flex"] {
-    display: flex !important;
-  }
-  
-  #invoiceModal.modal-overlay[style*="display: none"] {
-    display: none !important;
-  }
-  
-  #invoiceModal .modal-container {
-    background: white;
-    border-radius: 12px;
-    max-width: 900px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    z-index: 10001 !important;
-  }
-  
-  #invoiceModal .modal-close-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    color: #6b7280;
-    z-index: 10002;
-  }
-  
-  #invoiceModal .modal-close-btn:hover {
-    color: #111827;
-  }
-  
-  #invoiceModal .modal-body {
-    padding: 40px;
-  }
-  
-  #invoiceModal .modal-footer {
-    padding: 20px 40px;
-    border-top: 1px solid #e5e7eb;
-  }
+    #invoiceModal.modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 10000 !important;
+    }
+
+    #invoiceModal.modal-overlay[style*="display: flex"] {
+        display: flex !important;
+    }
+
+    #invoiceModal.modal-overlay[style*="display: none"] {
+        display: none !important;
+    }
+
+    #invoiceModal .modal-container {
+        background: white;
+        border-radius: 12px;
+        max-width: 900px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        z-index: 10001 !important;
+    }
+
+    #invoiceModal .modal-close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #6b7280;
+        z-index: 10002;
+    }
+
+    #invoiceModal .modal-header {
+        padding: 20px 40px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    #invoiceModal .modal-body {
+        padding: 40px;
+    }
+
+    #invoiceModal .modal-footer {
+        padding: 20px 40px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .category-badge-dynamic {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.125rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+        background-color: color-mix(in srgb, var(--cat-color, #1E90FF), transparent 85%);
+        color: var(--cat-color, #1E90FF);
+        border: 1px solid color-mix(in srgb, var(--cat-color, #1E90FF), transparent 70%);
+    }
+
+    .booking-stepper {
+        margin-bottom: 30px;
+        padding: 20px 0;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .stepper-container {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .progress-bg {
+        position: absolute;
+        top: 15px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #E2E8F0;
+        z-index: 1;
+    }
+
+    .progress-active {
+        position: absolute;
+        top: 15px;
+        left: 0;
+        height: 4px;
+        background: #1E90FF;
+        z-index: 2;
+        transition: width 0.5s ease;
+    }
+
+    .step-item {
+        flex: 1;
+        text-align: center;
+        position: relative;
+        z-index: 3;
+    }
+
+    .step-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #E2E8F0;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 8px;
+        font-weight: 700;
+        font-size: 13px;
+        border: 4px solid white;
+    }
+
+    .step-circle.active {
+        background: #1E90FF;
+    }
+
+    .step-circle.completed {
+        background: #059669;
+    }
+
+    .step-circle.primary {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+        box-shadow: 0 0 0 1px #1E90FF;
+    }
+
+    .step-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748B;
+    }
+
+    .step-label.active {
+        color: #1E90FF;
+        font-weight: 700;
+    }
+
+    .step-label.completed {
+        color: #059669;
+    }
+
+    .pay-badge {
+        font-size: 10px;
+        padding: 4px 10px;
+        border-radius: 4px;
+    }
+
+    .pay-badge.paid {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .pay-badge.pending {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    /* Send Message Button */
+    .btn-send-message {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #1E90FF 0%, #0070E0 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 100%;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(30, 144, 255, 0.25);
+    }
+
+    .btn-send-message:hover {
+        background: linear-gradient(135deg, #0070E0 0%, #005BB5 100%);
+        box-shadow: 0 4px 12px rgba(30, 144, 255, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .btn-send-message:active {
+        transform: translateY(0);
+    }
+
+    .btn-send-message svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Send Message Modal */
+    #sendMessageModal.modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000 !important;
+        backdrop-filter: blur(4px);
+    }
+
+    #sendMessageModal.modal-overlay.show {
+        display: flex !important;
+    }
+
+    #sendMessageModal .modal-container {
+        background: white;
+        border-radius: 16px;
+        max-width: 520px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+        z-index: 10001 !important;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    #sendMessageModal .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #E2E8F0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    #sendMessageModal .modal-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1A3A52;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #sendMessageModal .modal-header h3 svg {
+        color: #1E90FF;
+    }
+
+    #sendMessageModal .modal-close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #94A3B8;
+        padding: 4px;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+    }
+
+    #sendMessageModal .modal-close-btn:hover {
+        background: #F1F5F9;
+        color: #64748B;
+    }
+
+    #sendMessageModal .modal-body {
+        padding: 24px;
+    }
+
+    .msg-recipient-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: #F8FAFC;
+        border-radius: 10px;
+        margin-bottom: 16px;
+        border: 1px solid #E2E8F0;
+    }
+
+    .msg-recipient-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1E90FF 0%, #0070E0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .msg-recipient-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .msg-recipient-name {
+        font-weight: 600;
+        color: #1A3A52;
+        font-size: 0.9rem;
+    }
+
+    .msg-recipient-email {
+        font-size: 0.75rem;
+        color: #64748B;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .msg-textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 12px 16px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        resize: vertical;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        color: #1A3A52;
+        box-sizing: border-box;
+    }
+
+    .msg-textarea:focus {
+        outline: none;
+        border-color: #1E90FF;
+        box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.12);
+    }
+
+    .msg-textarea::placeholder {
+        color: #94A3B8;
+    }
+
+    .msg-char-count {
+        text-align: right;
+        font-size: 0.7rem;
+        color: #94A3B8;
+        margin-top: 4px;
+    }
+
+    .msg-char-count.warning {
+        color: #F59E0B;
+    }
+
+    .msg-char-count.danger {
+        color: #EF4444;
+    }
+
+    #sendMessageModal .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #E2E8F0;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .btn-msg-cancel {
+        padding: 10px 20px;
+        background: #F1F5F9;
+        color: #64748B;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .btn-msg-cancel:hover {
+        background: #E2E8F0;
+        color: #475569;
+    }
+
+    .btn-msg-send {
+        padding: 10px 24px;
+        background: linear-gradient(135deg, #1E90FF 0%, #0070E0 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-msg-send:hover:not(:disabled) {
+        background: linear-gradient(135deg, #0070E0 0%, #005BB5 100%);
+        box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
+    }
+
+    .btn-msg-send:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-msg-send .spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    .btn-msg-send.loading .spinner {
+        display: inline-block;
+    }
+
+    .btn-msg-send.loading .send-text {
+        display: none;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Toast notification */
+    .msg-toast {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        padding: 14px 20px;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        z-index: 20000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        transform: translateX(120%);
+        transition: transform 0.3s ease;
+    }
+
+    .msg-toast.show {
+        transform: translateX(0);
+    }
+
+    .msg-toast.success {
+        background: #059669;
+        color: white;
+    }
+
+    .msg-toast.error {
+        background: #EF4444;
+        color: white;
+    }
 </style>
 {% endblock %}
 
-{% block sidebar %}
-  {% include 'partials/sidebar.html' %}
-{% endblock %}
-
-{% block topbar %}
-  {% include 'partials/topbar.html' %}
-{% endblock %}
+{% block sidebar %}{% include 'partials/sidebar.html' %}{% endblock %}
+{% block topbar %}{% include 'partials/topbar.html' %}{% endblock %}
 
 {% block content %}
 <div class="manage-booking-page blue-sky">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <div class="header-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 1-2 2v12a2 2 0 0 0 2 2z"/>
-        </svg>
-      </div>
-      <div class="header-text">
-        <h1 class="page-title">Appointment Details</h1>
-        <p class="page-subtitle">Manage booking information and status updates</p>
-      </div>
-      <div class="header-actions">
-        <a href="{% url 'core:manage_church' church_id=booking.church.id %}?tab=appointments" class="btn btn-secondary">Back to Appointments</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="two-col">
-    <div class="card">
-      <div class="row" style="align-items:center; justify-content:space-between;">
-        <div>
-          <div class="section-title">Appointment ID</div>
-          <div class="value">{{ booking.code }}</div>
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 1-2 2v12a2 2 0 0 0 2 2z" />
+                </svg></div>
+            <div class="header-text">
+                <h1 class="page-title">Appointment Details</h1>
+                <p class="page-subtitle">Manage booking information and status updates</p>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'core:manage_church' church_id=booking.church.id %}?tab=appointments"
+                    class="btn btn-secondary">Back to Appointments</a>
+            </div>
         </div>
-        <div>
-          <div class="section-title">Current Status</div>
-          <span class="badge {{ booking.status }}">{{ booking.get_status_display }}</span>
-        </div>
-      </div>
-
-      <hr/>
-      <div>
-        <div class="section-title">Appointment Information</div>
-        <div class="row"><div class="label">Service</div><div class="value">{{ booking.service.name }}{% if booking.service.category %} <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.125rem 0.5rem; background-color: {{ booking.service.category.color }}20; color: {{ booking.service.category.color }}; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem; border: 1px solid {{ booking.service.category.color }}40;"><span>{{ booking.service.category.icon|default:"📁" }}</span><span>{{ booking.service.category.name }}</span></span>{% endif %}</div></div>
-        <div class="row"><div class="label">Date & Time</div><div class="value">{{ booking.date|date:'l, F j, Y' }} • {% if booking.start_time and booking.end_time %}{{ booking.start_time|time:'g:i A' }} - {{ booking.end_time|time:'g:i A' }}{% else %}Time not specified{% endif %}</div></div>
-        <div class="row"><div class="label">Notes</div><div class="value">{{ booking.notes|default:'No additional notes provided' }}</div></div>
-      </div>
-
-      <hr/>
-      <div>
-        <div class="section-title">Client Information</div>
-        <div class="row"><div class="label">Client Name</div><div class="value">{{ booking.user.get_full_name|default:booking.user.username }}</div></div>
-        <div class="row"><div class="label">Email Address</div><div class="value">{{ booking.user.email }}</div></div>
-        {% if booking.user.profile and booking.user.profile.phone %}
-          <div class="row"><div class="label">Phone Number</div><div class="value">{{ booking.user.profile.phone }}</div></div>
-        {% endif %}
-        {% if booking.user.profile and booking.user.profile.address %}
-          <div class="row"><div class="label">Address</div><div class="value">{{ booking.user.profile.address }}</div></div>
-        {% endif %}
-      </div>
     </div>
 
-    <div class="card">
-      <div class="section-title">Status Management</div>
-      <form method="post">
-        {% csrf_token %}
-        <div class="row">
-          <div class="label">New Status</div>
-          <select name="status" class="form-select">
-            {% for value,label in booking.STATUS_CHOICES %}
-              <option value="{{ value }}" {% if value == booking.status %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="row" id="decline-reason-row" style="display:none;">
-          <div class="label">Decline Reason</div>
-          <div class="value" style="flex:1;">
-            <select name="decline_reason" class="form-select" id="decline-reason-select">
-              <option value="">-- Select a reason --</option>
-              {% for r in decline_reasons %}
-                <option value="{{ r.label }}">{{ r.label }}</option>
-              {% endfor %}
-              <option value="__custom__">Other (specify)</option>
-            </select>
-            <input type="text" name="decline_reason_custom" id="decline-reason-custom" class="form-input" placeholder="Enter custom reason" style="margin-top:8px; display:none;">
-          </div>
-        </div>
-        <div class="row" style="justify-content:flex-end; gap:8px;">
-          <button type="submit" class="btn btn-primary">Update Status</button>
-        </div>
-      </form>
+    <div class="two-col">
+        <div class="col-left">
+            <div class="card">
+                <div class="booking-stepper">
+                    <div class="stepper-container">
+                        <div class="progress-bg"></div>
+                        <div class="progress-active" id="stepper-progress" data-status="{{ booking.status }}"></div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const status = document.getElementById('stepper-progress').dataset.status;
+                                const progressMap = {
+                                    'requested': '0%',
+                                    'pending_requirements': '25%',
+                                    'ready_to_schedule': '25%',
+                                    'schedule_requested': '50%',
+                                    'scheduled': '50%',
+                                    'reschedule': '50%',
+                                    'interview_completed': '75%',
+                                    'event_requested': '75%',
+                                    'event_scheduled': '75%',
+                                    'completed': '100%'
+                                };
+                                document.getElementById('stepper-progress').style.width = progressMap[status] || '0%';
+                            });
+                        </script>
 
-      <hr/>
-      <div class="section-title">Invoice</div>
-      {% if booking.status == 'canceled' or booking.status == 'declined' %}
-        <p>This booking is {{ booking.get_status_display|lower }}. Invoice is not available.</p>
-      {% else %}
-        <p>Once an appointment is reviewed, the client can print the invoice with details to bring to your church office for completion.</p>
-        <button type="button" class="btn btn-outline" onclick="openInvoiceModal()">Open Invoice</button>
-      {% endif %}
+                        <div class="step-item">
+                            <div
+                                class="step-circle primary {% if booking.status != 'canceled' and booking.status != 'declined' %}active{% endif %}">
+                                1</div>
+                            <div
+                                class="step-label {% if booking.status != 'canceled' and booking.status != 'declined' %}active{% endif %}">
+                                Requested</div>
+                        </div>
+                        <div class="step-item">
+                            <div
+                                class="step-circle {% if booking.status in 'pending_requirements,ready_to_schedule,schedule_requested,scheduled,interview_completed,event_scheduled,completed' %}active{% endif %}">
+                                2</div>
+                            <div
+                                class="step-label {% if booking.status in 'pending_requirements,ready_to_schedule,schedule_requested,scheduled,interview_completed,event_scheduled,completed' %}active{% endif %}">
+                                Requirements</div>
+                        </div>
+                        <div class="step-item">
+                            <div
+                                class="step-circle {% if booking.status in 'schedule_requested,scheduled,interview_completed,event_scheduled,completed' %}active{% endif %}">
+                                3</div>
+                            <div
+                                class="step-label {% if booking.status in 'schedule_requested,scheduled,interview_completed,event_scheduled,completed' %}active{% endif %}">
+                                Interview</div>
+                        </div>
+                        <div class="step-item">
+                            <div
+                                class="step-circle {% if booking.status in 'interview_completed,event_requested,event_scheduled,completed' %}active{% endif %}">
+                                4</div>
+                            <div
+                                class="step-label {% if booking.status in 'interview_completed,event_requested,event_scheduled,completed' %}active{% endif %}">
+                                Event Date</div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-circle {% if booking.status == 'completed' %}completed{% endif %}">5</div>
+                            <div class="step-label {% if booking.status == 'completed' %}completed{% endif %}">Completed
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" style="align-items:center; justify-content:space-between;">
+                    <div>
+                        <div class="section-title">Appointment ID</div>
+                        <div class="value" style="font-family: monospace; font-size: 1.1rem; color: #1E90FF; font-weight: 700;">{{ booking.code }}</div>
+                    </div>
+                    <div>
+                        <div class="section-title">Current Status</div>
+                        <span class="badge {{ booking.status }}" style="font-size: 12px; padding: 6px 16px;">{{ booking.get_status_display }}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="label">Service</div>
+                    <div class="value">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span>{{ booking.service.name }}</span>
+                            {% if booking.status in 'interview_completed,event_requested,event_scheduled,completed' %}
+                            <span class="badge"
+                                style="background: #eff6ff; color: #1e40af; font-size: 0.75rem; border: 1px solid #bfdbfe;">
+                                {{ booking.service.event_preparation_days }} days prep
+                            </span>
+                            {% if booking.service.available_time_slots %}
+                            <div
+                                style="font-size: 0.75rem; color: #0369a1; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; display: inline-block; border: 1px solid #bae6fd;">
+                                <i data-feather="clock" style="width: 10px; height: 10px; margin-right: 2px;"></i>
+                                Service Slots: {{ booking.service.available_time_slots }}
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                        {% if booking.service.category %}
+                        <span class="category-badge-dynamic"
+                            style="--cat-color: {{ booking.service.category.color|default:'#1E90FF' }};">
+                            <span>{{ booking.service.category.icon|default:"" }}</span>
+                            <span>{{ booking.service.category.name }}</span>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="label">Assigned Priest</div>
+                    <div class="value">
+                        {% if booking.pastor %}
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            {% if booking.pastor.photo %}<img src="{{ booking.pastor.photo.url }}"
+                                alt="{{ booking.pastor.name }}"
+                                style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">{% endif %}
+                            <div>
+                                <div style="font-weight: 700; color: #1E90FF;">{{ booking.pastor.full_title }}</div>
+                                {% if booking.pastor.available_time_slots %}
+                                <div
+                                    style="font-size: 0.75rem; color: #1e40af; background: #eff6ff; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; border: 1px solid #bfdbfe;">
+                                    <i data-feather="clock" style="width: 10px; height: 10px; margin-right: 2px;"></i>
+                                    Slots: {{ booking.pastor.available_time_slots }}
+                                </div>
+                                {% endif %}
+                                {% if booking.pastor.specializations %}<div
+                                    style="font-size: 0.75rem; color: #64748B; margin-top: 2px;">Specialization:
+                                    {{ booking.pastor.specializations }}</div>{% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <span style="color: #64748B; font-style: italic;">No priest assigned yet</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="label">Interview Schedule</div>
+                    <div class="value">
+                        {% if booking.date %}
+                        <span style="font-weight: 700; color: #1A3A52;">{{ booking.date|date:'l, F j, Y' }}</span>
+                        {% if booking.start_time %}
+                        <span
+                            style="margin-left: 8px; padding: 2px 8px; background: #F0F8FF; border-radius: 4px; color: #1E90FF;">
+                            <i data-feather="clock" style="width: 14px; height: 14px; vertical-align: middle;"></i> {{ booking.start_time|time:'g:i A' }}
+                        </span>
+                        {% elif booking.time_slot %}
+                        <span
+                            style="margin-left: 8px; padding: 2px 8px; background: #F0F8FF; border-radius: 4px; color: #1E90FF;">
+                            <i data-feather="clock" style="width: 14px; height: 14px; vertical-align: middle;"></i> {{ booking.time_slot }}
+                        </span>
+                        {% endif %}
+                        {% else %}
+                        <span style="color: #64748B; font-style: italic;">Not yet scheduled</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if booking.event_date %}
+                <div class="row">
+                    <div class="label">Event Schedule</div>
+                    <div class="value">
+                        <span style="font-weight: 700; color: #DB2777;">{{ booking.event_date|date:'l, F j, Y' }}</span>
+                        {% if booking.event_time %}
+                        <span
+                            style="margin-left: 8px; padding: 2px 8px; background: #FDF2F8; border-radius: 4px; color: #DB2777;">
+                            <i data-feather="clock" style="width: 14px; height: 14px; vertical-align: middle;"></i> {{ booking.event_time|time:'g:i A' }}
+                        </span>
+                        {% elif booking.event_time_slot %}
+                        <span
+                            style="margin-left: 8px; padding: 2px 8px; background: #FDF2F8; border-radius: 4px; color: #DB2777;">
+                            <i data-feather="clock" style="width: 14px; height: 14px; vertical-align: middle;"></i> {{ booking.event_time_slot }}
+                        </span>
+                        {% endif %}
+                        {% if booking.status == 'event_requested' %}
+                        <span class="status-badge"
+                            style="margin-left: 10px; background: #FEF3C7; color: #92400E; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 600;">PENDING
+                            REVIEW</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="label">Request Notes</div>
+                    <div class="value">{{ booking.notes|default:'No additional notes provided' }}</div>
+                </div>
+
+                {% if booking.service.requirements or booking.service.preparation_notes %}
+                <div
+                    style="margin-top: 20px; padding: 15px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0;">
+                    <div
+                        style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
+                        Service Context</div>
+                    {% if booking.service.requirements %}
+                    <div style="margin-bottom: 10px;">
+                        <div style="font-weight: 600; font-size: 0.85rem; color: #1A3A52;">Requirements</div>
+                        <div style="font-size: 0.85rem; color: #475569; white-space: pre-line;">{{ booking.service.requirements|safe }}</div>
+                    </div>
+                    {% endif %}
+                    {% if booking.service.preparation_notes %}
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.85rem; color: #1A3A52;">Preparation Notes</div>
+                        <div style="font-size: 0.85rem; color: #475569; white-space: pre-line;">{{ booking.service.preparation_notes }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <hr />
+                <div class="section-title">Payment Details</div>
+                <div class="row">
+                    <div class="label">Total Amount</div>
+                    <div class="value" style="font-weight: 700; color: #059669;">
+                        {% if booking.service.price > 0 %}&#8369;{{ booking.service.price|floatformat:2 }}{% else
+                        %}Free{% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="label">Payment Status</div>
+                    <div class="value">
+                        <span
+                            class="pay-badge {% if booking.payment_status == 'paid' %}paid{% else %}pending{% endif %}">
+                            {{ booking.payment_status|upper }}
+                        </span>
+                    </div>
+                </div>
+                {% if booking.payment_method %}
+                <div class="row">
+                    <div class="label">Method</div>
+                    <div class="value" style="text-transform: capitalize;">{{ booking.payment_method }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-right">
+            <div class="card">
+                <div class="section-title">Client Information</div>
+                <div class="row">
+                    <div class="label">Name</div>
+                    <div class="value">{{ booking.user.get_full_name|default:booking.user.username }}</div>
+                </div>
+                <div class="row">
+                    <div class="label">Email</div>
+                    <div class="value">{{ booking.user.email }}</div>
+                </div>
+                {% if booking.user.profile.phone %}
+                <div class="row">
+                    <div class="label">Phone</div>
+                    <div class="value">{{ booking.user.profile.phone }}</div>
+                </div>
+                {% endif %}
+
+                <hr />
+                <div class="section-title">Send Message</div>
+                <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 12px;">Send a direct message to this
+                    client
+                    regarding their appointment.</p>
+                <button type="button" class="btn-send-message" id="openSendMessageBtn" onclick="openSendMessageModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    Send Message to {{ booking.user.get_full_name|default:booking.user.username }}
+                </button>
+                <hr />
+
+                <div class="section-title">Status Management</div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="label">New Status</div>
+                        <select name="status" class="form-select">
+                            <option value="{{ booking.status }}" selected>{{ booking.get_status_display }} (Current)
+                            </option>
+                            {% if booking.status == 'requested' %}
+                            <option value="approved">Accept Request (Send Requirements)</option>
+                            <option value="declined">Decline Request</option>
+                            {% elif booking.status == 'schedule_requested' %}
+                            <option value="scheduled">Approve Schedule</option>
+                            <option value="reschedule">Decline (Ask to Reschedule)</option>
+                            <option value="declined">Decline Request (End)</option>
+                            {% elif booking.status == 'approved' %}
+                            <option value="confirmed">Requirements Verified (Allow Scheduling)</option>
+                            <option value="declined">Decline Request</option>
+                            {% elif booking.status == 'confirmed' or booking.status == 'ready_to_schedule' or
+                            booking.status ==
+                            'reschedule' %}
+                            <option value="scheduled">Date Scheduled</option>
+                            <option value="completed">Mark as Completed</option>
+                            <option value="canceled">Cancel Appointment</option>
+                            {% elif booking.status == 'scheduled' %}
+                            <option value="interview_completed">Interview Completed (Allow Event Scheduling)</option>
+                            <option value="completed">Mark as Completed</option>
+                            <option value="canceled">Cancel Appointment</option>
+                            {% elif booking.status == 'interview_completed' %}
+                            <option value="event_scheduled">Event Scheduled</option>
+                            <option value="completed">Mark as Completed</option>
+                            {% elif booking.status == 'event_requested' %}
+                            <option value="event_scheduled">Approve Event Schedule</option>
+                            <option value="interview_completed">Request Different Event Date</option>
+                            <option value="canceled">Cancel Request</option>
+                            {% elif booking.status == 'event_scheduled' %}
+                            <option value="completed">Mark as Completed</option>
+                            <option value="canceled">Cancel Event</option>
+                            {% elif booking.status == 'completed' %}
+                            <option value="confirmed">Reopen Appointment</option>
+                            {% elif booking.status == 'declined' or booking.status == 'canceled' %}
+                            <option value="requested">Reopen Request</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="row" id="decline-reason-row" style="display:none;">
+                        <div class="label">Decline Reason</div>
+                        <div class="value" style="flex:1;">
+                            <select name="decline_reason" class="form-select" id="decline-reason-select">
+                                <option value="">-- Select a reason --</option>
+                                {% for r in decline_reasons %}
+                                <option value="{{ r.label }}">{{ r.label }}</option>
+                                {% endfor %}
+                                <option value="__custom__">Other (specify)</option>
+                            </select>
+                            <input type="text" name="decline_reason_custom" id="decline-reason-custom"
+                                class="form-input" placeholder="Enter custom reason"
+                                style="margin-top:8px; display:none;">
+                        </div>
+                    </div>
+                    <div class="row" style="justify-content:flex-end; margin-top: 15px;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Update Booking
+                            Status</button>
+                    </div>
+                </form>
+                <hr />
+
+                <div class="section-title">Invoice & Documentation</div>
+                {% if booking.status == 'canceled' or booking.status == 'declined' %}
+                <p class="text-muted" style="font-size: 0.9rem;">This booking is {{ booking.get_status_display|lower }}.
+                    Invoice
+                    generation is disabled.</p>
+                {% else %}
+                <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">You can generate a summary invoice
+                    for the
+                    client.</p>
+                <button type="button" class="btn btn-outline" style="width: 100%;" onclick="openInvoiceModal()">
+                    <i data-feather="file-text"
+                        style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i>
+                    Open Booking Invoice
+                </button>
+                {% endif %}
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- Invoice Modal -->
 <div id="invoiceModal" class="modal-overlay" style="display: none;">
-  <div class="modal-container appointment-summary-modal">
-    <!-- Modal Header -->
-    <div class="modal-header">
-      <button class="modal-close-btn" onclick="closeInvoiceModal()">&times;</button>
+    <div class="modal-container appointment-summary-modal">
+        <div class="modal-header">
+            <h2 style="margin: 0; font-size: 1.25rem;">Booking Invoice</h2>
+            <button class="modal-close-btn" onclick="closeInvoiceModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="position: relative !important;">
+            <div class="watermark-logo print-only"
+                style="position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 550px !important; height: 550px !important; z-index: 0 !important; pointer-events: none !important; opacity: 0.12 !important;">
+                <img src="{% static 'images/logo.png' %}" alt="Diocese of Iligan Watermark"
+                    style="width: 100% !important; height: 100% !important; object-fit: contain !important;">
+            </div>
+            {% include 'core/partials/booking_invoice_content.html' %}
+        </div>
+        <div class="modal-footer" style="display: flex; gap: 12px;">
+            <button type="button" class="btn btn-primary" onclick="printInvoice()" style="flex: 1;">
+                <i data-feather="printer"
+                    style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i>
+                Print Invoice
+            </button>
+            <button type="button" class="btn btn-outline" onclick="closeInvoiceModal()" style="flex: 1;">Close</button>
+        </div>
     </div>
-    
-    <!-- Modal Body -->
-    <div class="modal-body" style="position: relative !important;">
-      <!-- Watermark Logo (Print Only) -->
-      <div class="watermark-logo print-only" style="position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 550px !important; height: 550px !important; z-index: 0 !important; pointer-events: none !important; opacity: 0.12 !important;">
-        <img src="{% static 'images/logo.png' %}" alt="Diocese of Iligan Watermark" style="width: 100% !important; height: 100% !important; object-fit: contain !important;">
-      </div>
-      
-      {% include 'core/partials/booking_invoice_content.html' %}
+</div>
+
+<!-- Send Message Modal -->
+<div id="sendMessageModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                Send Message
+            </h3>
+            <button class="modal-close-btn" onclick="closeSendMessageModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="msg-recipient-info">
+                <div class="msg-recipient-avatar">
+                    {{ booking.user.get_full_name|default:booking.user.username|make_list|first|upper }}
+                </div>
+                <div class="msg-recipient-details">
+                    <div class="msg-recipient-name">{{ booking.user.get_full_name|default:booking.user.username }}</div>
+                    <div class="msg-recipient-email">{{ booking.user.email }} &middot; Booking {{ booking.code }}</div>
+                </div>
+            </div>
+            <textarea class="msg-textarea" id="sendMessageContent"
+                placeholder="Type your message to {{ booking.user.get_full_name|default:booking.user.username }}..."
+                maxlength="1000"></textarea>
+            <div class="msg-char-count" id="msgCharCount">0 / 1000</div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-msg-cancel" onclick="closeSendMessageModal()">Cancel</button>
+            <button type="button" class="btn-msg-send" id="sendMessageBtn" onclick="sendMessageToUser()" disabled>
+                <span class="send-text">Send Message</span>
+                <span class="spinner"></span>
+            </button>
+        </div>
     </div>
-    
-    <!-- Modal Footer -->
-    <div class="modal-footer" style="display: flex; gap: 12px;">
-      <button type="button" class="btn btn-primary" onclick="printInvoice()" style="flex: 1;">
-        <i data-feather="printer" style="width: 16px; height: 16px; margin-right: 8px;"></i>
-        Print
-      </button>
-      <button type="button" class="btn btn-outline" onclick="closeInvoiceModal()" style="flex: 1;">Close</button>
-    </div>
-  </div>
 </div>
 
 <script>
-(function() {
-  const statusSelect = document.querySelector('select[name="status"]');
-  const reasonRow = document.getElementById('decline-reason-row');
-  const reasonSelect = document.getElementById('decline-reason-select');
-  const reasonCustom = document.getElementById('decline-reason-custom');
-  function refresh() {
-    const show = statusSelect && statusSelect.value === 'declined';
-    if (!reasonRow) return;
-    reasonRow.style.display = show ? 'flex' : 'none';
-    if (!show) return;
-    const isCustom = reasonSelect && reasonSelect.value === '__custom__';
-    if (reasonCustom) reasonCustom.style.display = isCustom ? 'block' : 'none';
-  }
-  if (statusSelect) statusSelect.addEventListener('change', refresh);
-  if (reasonSelect) reasonSelect.addEventListener('change', refresh);
-  // Initial state
-  refresh();
-})();
-
-// Invoice Modal Functions
-function openInvoiceModal() {
-  document.getElementById('invoiceModal').style.display = 'flex';
-  // Re-initialize Feather icons
-  if (typeof feather !== 'undefined') {
-    feather.replace();
-  }
-}
-
-function closeInvoiceModal() {
-  document.getElementById('invoiceModal').style.display = 'none';
-}
-
-function printInvoice() {
-  const modalBody = document.querySelector('#invoiceModal .modal-body');
-  if (!modalBody) return;
-  
-  const printContent = modalBody.cloneNode(true);
-  const printWindow = window.open('', '_blank');
-  
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Appointment Invoice - {{ booking.code }}</title>
-      <style>
-        @page { margin: 0.5in; }
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          margin: 0;
-          padding: 20px;
-          background: white;
+    (function () {
+        const statusSelect = document.querySelector('select[name="status"]');
+        const reasonRow = document.getElementById('decline-reason-row');
+        const reasonSelect = document.getElementById('decline-reason-select');
+        const reasonCustom = document.getElementById('decline-reason-custom');
+        function refresh() {
+            if (!statusSelect) return;
+            const isDeclined = statusSelect.value === 'declined';
+            if (reasonRow) reasonRow.style.display = isDeclined ? 'flex' : 'none';
+            if (isDeclined && reasonSelect) {
+                const isCustom = reasonSelect.value === '__custom__';
+                if (reasonCustom) reasonCustom.style.display = isCustom ? 'block' : 'none';
+            }
         }
-        * { box-sizing: border-box; }
-        .invoice { background: white; padding: 20px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
-        .label { color: #6b7280; font-weight: 600; }
-        .value { font-weight: 500; }
-        hr { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
-      </style>
-    </head>
-    <body>
-      ${printContent.innerHTML}
-    </body>
-    </html>
-  `);
-  
-  printWindow.document.close();
-  printWindow.onload = function() {
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-  };
-}
+        if (statusSelect) statusSelect.addEventListener('change', refresh);
+        if (reasonSelect) reasonSelect.addEventListener('change', refresh);
+        refresh();
+    })();
+    function openInvoiceModal() {
+        document.getElementById('invoiceModal').style.display = 'flex';
+        if (typeof feather !== 'undefined') { feather.replace(); }
+    }
+    function closeInvoiceModal() { document.getElementById('invoiceModal').style.display = 'none'; }
+    function printInvoice() {
+        const modalBody = document.querySelector('#invoiceModal .modal-body');
+        if (!modalBody) return;
+        const printContent = modalBody.innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write('<!DOCTYPE html><html><head><title>Invoice - {{ booking.code }}</title><style>body{font-family:sans-serif;padding:40px;} .row{display:flex;justify-content:space-between;margin-bottom:10px;} hr{border:none;border-top:1px solid #eee;margin:20px 0;}</style></head><body>' + printContent + '</body></html>');
+        printWindow.document.close();
+        printWindow.onload = function () { printWindow.focus(); printWindow.print(); printWindow.close(); };
+    }
+
+    // --- Send Message Feature ---
+    function openSendMessageModal() {
+        document.getElementById('sendMessageModal').classList.add('show');
+        document.getElementById('sendMessageContent').value = '';
+        updateCharCount();
+        document.getElementById('sendMessageContent').focus();
+    }
+
+    function closeSendMessageModal() {
+        document.getElementById('sendMessageModal').classList.remove('show');
+    }
+
+    function updateCharCount() {
+        const textarea = document.getElementById('sendMessageContent');
+        const counter = document.getElementById('msgCharCount');
+        const sendBtn = document.getElementById('sendMessageBtn');
+        const len = textarea.value.trim().length;
+        counter.textContent = len + ' / 1000';
+        counter.className = 'msg-char-count' + (len > 900 ? ' danger' : len > 700 ? ' warning' : '');
+        sendBtn.disabled = len === 0;
+    }
+
+    document.getElementById('sendMessageContent').addEventListener('input', updateCharCount);
+
+    // Close modal when clicking outside
+    document.getElementById('sendMessageModal').addEventListener('click', function (e) {
+        if (e.target === this) closeSendMessageModal();
+    });
+
+    function showToast(message, type) {
+        // Remove existing toasts
+        document.querySelectorAll('.msg-toast').forEach(t => t.remove());
+        const toast = document.createElement('div');
+        toast.className = 'msg-toast ' + type;
+        toast.innerHTML = (type === 'success'
+            ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+            : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>')
+            + '<span>' + message + '</span>';
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add('show'));
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3500);
+    }
+
+    function sendMessageToUser() {
+        const textarea = document.getElementById('sendMessageContent');
+        const content = textarea.value.trim();
+        const sendBtn = document.getElementById('sendMessageBtn');
+        if (!content) return;
+
+        sendBtn.classList.add('loading');
+        sendBtn.disabled = true;
+
+        fetch('{% url "core:send_message_to_user" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({
+                user_id: parseInt("{{ booking.user.id }}"),
+                church_id: parseInt("{{ booking.church.id }}"),
+                content: content
+            })
+        })
+            .then(resp => resp.json().then(data => ({ ok: resp.ok, data })))
+            .then(({ ok, data }) => {
+                sendBtn.classList.remove('loading');
+                if (ok && data.success) {
+                    closeSendMessageModal();
+                    showToast('Message sent to {{ booking.user.get_full_name|default:booking.user.username }}!', 'success');
+                } else {
+                    showToast(data.error || 'Failed to send message. Please try again.', 'error');
+                    sendBtn.disabled = false;
+                }
+            })
+            .catch(err => {
+                sendBtn.classList.remove('loading');
+                sendBtn.disabled = false;
+                showToast('Network error. Please try again.', 'error');
+                console.error('Send message error:', err);
+            });
+    }
 </script>
 {% endblock %}

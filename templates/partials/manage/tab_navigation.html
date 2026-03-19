@@ -51,6 +51,18 @@
   </button>
   {% endif %}
   
+  {# Priests - Owner and Secretary only #}
+  {% if user_role == 'owner' or user_role == 'secretary' %}
+  <button class="tab-btn {% if request.GET.tab == 'priests' %}active{% endif %}" data-tab="priests">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+      <path d="M12 2v5M12 19v3M2 12h3M19 12h3"/>
+    </svg>
+    <span class="tab-label">Priests</span>
+  </button>
+  {% endif %}
+  
   {# Events - Owner and Volunteer only #}
   {% if user_role == 'owner' or user_role == 'volunteer' %}
   <button class="tab-btn" data-tab="events">

@@ -11,7 +11,9 @@ from .models import (
     Post,
     ChurchVerificationRequest,
     ChurchVerificationDocument,
+
     DeclineReason,
+    Pastor,
 )
 from .form_utils import get_form_widgets, clean_phone_field, clean_name_field
 
@@ -479,8 +481,8 @@ class BookableServiceForm(forms.ModelForm):
         model = BookableService
         fields = [
             'name', 'category', 'description', 'image', 'price', 'is_free', 'currency', 'duration', 
-            'max_bookings_per_day', 'advance_booking_days', 'is_active', 
-            'requires_approval', 'preparation_notes', 'cancellation_policy'
+            'max_bookings_per_day', 'advance_booking_days', 'event_preparation_days', 'available_time_slots', 'is_active', 
+            'requires_approval', 'preparation_notes', 'requirements', 'cancellation_policy'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -521,12 +523,27 @@ class BookableServiceForm(forms.ModelForm):
                 'max': 365,
                 'placeholder': '7'
             }),
+            'event_preparation_days': forms.NumberInput(attrs={
+                'class': 'form-input',
+                'min': 0,
+                'max': 365,
+                'placeholder': '30'
+            }),
+            'available_time_slots': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g., 9:00 AM - 11:00 AM, 1:00 PM - 4:00 PM'
+            }),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'requires_approval': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'preparation_notes': forms.Textarea(attrs={
                 'class': 'form-textarea',
                 'placeholder': 'Instructions for people booking this service (optional)',
                 'rows': 2
+            }),
+            'requirements': forms.Textarea(attrs={
+                'class': 'form-textarea',
+                'placeholder': 'List of requirements (one per line for bullet points)\ne.g.,\nBirth Certificate\nBaptismal Certificate',
+                'rows': 4
             }),
             'cancellation_policy': forms.Textarea(attrs={
                 'class': 'form-textarea',
@@ -551,6 +568,7 @@ class BookableServiceForm(forms.ModelForm):
         self.fields['is_free'].required = False
         self.fields['max_bookings_per_day'].required = False
         self.fields['advance_booking_days'].required = False
+        self.fields['event_preparation_days'].required = False
         self.fields['currency'].required = False
     
     def save(self, commit=True):
@@ -563,6 +581,8 @@ class BookableServiceForm(forms.ModelForm):
             service.max_bookings_per_day = 10  # Default value
         if not service.advance_booking_days:
             service.advance_booking_days = 30  # Default value
+        if not service.event_preparation_days:
+            service.event_preparation_days = 30  # Default value
         
         # Set is_free based on price
         service.is_free = not service.price or service.price == 0
@@ -589,6 +609,8 @@ class BookableServiceForm(forms.ModelForm):
             cleaned_data['max_bookings_per_day'] = 10
         if not cleaned_data.get('advance_booking_days'):
             cleaned_data['advance_booking_days'] = 30
+        if not cleaned_data.get('event_preparation_days'):
+            cleaned_data['event_preparation_days'] = 30
         
         # Determine is_free based on price
         cleaned_data['is_free'] = not price or price == 0
@@ -611,7 +633,7 @@ class BookingForm(forms.ModelForm):
         model = Booking
         fields = ['date', 'start_time', 'notes']
         widgets = {
-            'date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date', 'required': True}),
+            'date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
             'start_time': forms.TimeInput(attrs={'class': 'form-input', 'type': 'time'}),
             'notes': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3, 'placeholder': 'Additional notes (optional)'}),
         }
@@ -620,6 +642,11 @@ class BookingForm(forms.ModelForm):
         self.service = kwargs.pop('service', None)
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        
+        # Make date and time optional for initial request
+        self.fields['date'].required = False
+        self.fields['start_time'].required = False
+        
         # Set HTML5 min/max for the date field when service is provided
         if self.service:
             from datetime import date, timedelta
@@ -630,6 +657,46 @@ class BookingForm(forms.ModelForm):
                 'max': max_date.strftime('%Y-%m-%d'),
             })
 
+class BookingScheduleForm(forms.ModelForm):
+    """Form for scheduling a date after booking approval."""
+    
+    # Add a time field for the wizard interface
+    time = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.HiddenInput(),
+        help_text="Preferred time slot selected by user"
+    )
+    
+    class Meta:
+        model = Booking
+        fields = ['date', 'start_time', 'time_slot', 'pastor']
+        widgets = {
+            'date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date', 'required': True}),
+            'start_time': forms.TimeInput(attrs={'class': 'form-input', 'type': 'time', 'required': False}),
+            'time_slot': forms.HiddenInput(),
+            'pastor': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.service = self.instance.service if self.instance and self.instance.pk else None
+        
+        # Make date required
+        self.fields['date'].required = True
+        self.fields['start_time'].required = False
+        self.fields['time_slot'].required = False
+        
+        # Filter pastors if instance exists
+        if self.instance and self.instance.church:
+            qs = Pastor.objects.filter(church=self.instance.church, is_available=True)
+            if self.instance.pk and self.instance.pastor_id:
+                qs = qs | Pastor.objects.filter(id=self.instance.pastor_id)
+            
+            self.fields['pastor'].queryset = qs.distinct().order_by('order', 'name')
+            self.fields['pastor'].empty_label = "Select a Priest (Optional)"
+            self.fields['pastor'].required = False
+
     def clean_date(self):
         d = self.cleaned_data.get('date')
         if not self.service:
@@ -638,76 +705,153 @@ class BookingForm(forms.ModelForm):
         today = date.today()
         if d < today:
             raise forms.ValidationError('Please choose a future date.')
-        max_date = today + timedelta(days=self.service.advance_booking_days)
-        if d > max_date:
-            raise forms.ValidationError('Selected date is beyond the allowed booking window.')
+        
+        # Only check max days if service defines it (optional)
+        if self.service.advance_booking_days:
+            # Extend the booking window by the priest's preparation days
+            # so the user can still schedule within the allowed window
+            # even when a priest requires preparation time
+            pastor_prep_days = 0
+            if self.instance and self.instance.pastor_id:
+                try:
+                    pastor_prep_days = self.instance.pastor.preparation_days or 0
+                except Exception:
+                    pass
+            
+            max_days = self.service.advance_booking_days + pastor_prep_days
+            max_date = today + timedelta(days=max_days)
+            if d > max_date:
+                raise forms.ValidationError('Selected date is beyond the allowed booking window.')
+        
         # Check availability: must not be a closed date
         closed = Availability.objects.filter(church=self.service.church, date=d, is_closed=True).exists()
         if closed:
             raise forms.ValidationError('This date is closed. Please choose another date.')
         return d
     
-    def clean_time(self):
-        """Parse the time string from the wizard to set start_time."""
-        time_str = self.cleaned_data.get('time')
-        if time_str:
-            from datetime import datetime
-            try:
-                # Parse time strings like "9:00 AM", "2:30 PM"
-                time_obj = datetime.strptime(time_str, '%I:%M %p').time()
-                # Set the start_time field
-                self.cleaned_data['start_time'] = time_obj
-                return time_str
-            except ValueError:
-                raise forms.ValidationError('Invalid time format.')
-        return time_str
-    
     def clean(self):
-        """Process the time field and convert to start_time."""
+        """Process the time field and validate pastor availability."""
         cleaned_data = super().clean()
         time_str = cleaned_data.get('time')
         
-        if time_str:
+        # If time is provided via hidden field (wizard style), parse it
+        if time_str and not cleaned_data.get('start_time'):
             from datetime import datetime
             try:
                 # Parse time strings like "9:00 AM", "2:30 PM"
+                # Strip spaces just in case
+                time_str = time_str.strip()
                 time_obj = datetime.strptime(time_str, '%I:%M %p').time()
                 # Set the start_time field
                 cleaned_data['start_time'] = time_obj
+                self.instance.start_time = time_obj # Update instance too
             except ValueError:
-                raise forms.ValidationError('Invalid time format.')
+                pass 
+                
+        # Also handle time_slot if it's provided directly without time passing
+        time_slot = cleaned_data.get('time_slot')
+        if not time_str and time_slot:
+            # We don't have strictly valid time, but a slot
+            pass
+
+        # Check pastor availability
+        date = cleaned_data.get('date')
+        pastor = cleaned_data.get('pastor')
         
+        if date and pastor:
+            # Check availability using the helper method
+            if not pastor.is_available_on(date):
+                day_name = date.strftime('%A')
+                msg = f"{pastor.full_title} is not available on {day_name}s. " \
+                      f"Availability: {pastor.display_availability}"
+                self.add_error('date', msg)
+                # Also mark pastor field as having error so user notices
+                self.add_error('pastor', "Selected pastor is unavailable on this date.")
+
         return cleaned_data
 
     def save(self, commit=True):
         booking = super().save(commit=False)
-        if self.service:
-            booking.service = self.service
-            booking.church = self.service.church
-            # Auto-populate payment amount from service price
-            if not self.service.is_free and self.service.price:
-                booking.payment_amount = self.service.price
-        if self.user:
-            booking.user = self.user
-        booking.status = Booking.STATUS_REQUESTED
+        # Service and User are already set on the booking instance
         if commit:
             booking.save()
-            
-            # Notify all parish staff with 'appointments' permission
-            from .notifications import notify_parish_staff, NotificationTemplates
-            from .models import Notification
-            
-            tmpl = NotificationTemplates.booking_requested(booking)
-            notify_parish_staff(
-                church=booking.church,
-                notification_type=Notification.TYPE_BOOKING_REQUESTED,
-                title=tmpl['title'],
-                message=tmpl['message'],
-                required_permission='appointments',
-                priority=tmpl['priority'],
-                booking=booking
-            )
+            # Notification is handled by the view
         return booking
+
+
+class BookingEventScheduleForm(forms.ModelForm):
+    """Form for scheduling the actual event date after priest interview."""
+    
+    time = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.HiddenInput(),
+        help_text="Preferred time slot"
+    )
+    
+    class Meta:
+        model = Booking
+        fields = ['event_date', 'event_time', 'event_time_slot']
+        widgets = {
+            'event_date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date', 'required': True}),
+            'event_time': forms.TimeInput(attrs={'class': 'form-input', 'type': 'time', 'required': False}),
+            'event_time_slot': forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['event_date'].required = True
+        self.fields['event_time'].required = False
+        self.fields['event_time_slot'].required = False
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        time_str = cleaned_data.get('time')
+        
+        if time_str and not cleaned_data.get('event_time'):
+            from datetime import datetime
+            try:
+                time_str = time_str.strip()
+                time_obj = datetime.strptime(time_str, '%I:%M %p').time()
+                cleaned_data['event_time'] = time_obj
+                self.instance.event_time = time_obj
+            except ValueError:
+                pass 
+        return cleaned_data
+
+    def clean_event_date(self):
+        d = self.cleaned_data.get('event_date')
+        from datetime import date, timedelta
+        if d and d < date.today():
+             raise forms.ValidationError('Please choose a future date.')
+        
+        # Enforce minimum preparation days from the service and the assigned priest
+        if d:
+            service_prep_days = self.instance.service.event_preparation_days if self.instance.service and self.instance.service.event_preparation_days else 30
+            priest_prep_days = self.instance.pastor.preparation_days if self.instance.pastor and self.instance.pastor.preparation_days else 0
+            
+            # The preparation time needed is whichever is longer
+            prep_days = max(service_prep_days, priest_prep_days)
+            
+            earliest_date = date.today() + timedelta(days=prep_days)
+            if d < earliest_date:
+                raise forms.ValidationError(
+                    f'The event needs at least {prep_days} days of preparation. '
+                    f'Please choose a date on or after {earliest_date.strftime("%B %d, %Y")}.'
+                )
+
+        # Check church availability (closed dates)
+        if self.instance.church:
+             closed = Availability.objects.filter(church=self.instance.church, date=d, is_closed=True).exists()
+             if closed:
+                 raise forms.ValidationError('The church is closed on this date. Please choose another date.')
+
+        # NOTE: Priest weekly availability is NOT checked here.
+        # The priest's available_days schedule only applies to interview scheduling,
+        # not the actual event date (e.g., wedding, baptism ceremony).
+
+        return d
+
 
 
 class DeclineReasonForm(forms.ModelForm):

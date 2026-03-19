@@ -36,7 +36,7 @@ body.page-appointments {
   background: linear-gradient(135deg, #F0F8FF 0%, #E8F4FF 50%, #F0F8FF 100%);
   border-radius: 20px;
   border: 2px solid rgba(30, 144, 255, 0.15);
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(30, 144, 255, 0.1),
     0 4px 8px rgba(30, 144, 255, 0.05);
 }
@@ -70,7 +70,7 @@ body.page-appointments {
   background: linear-gradient(135deg, #1E90FF 0%, #4169E1 100%);
   border-color: #1E90FF;
   color: #FFFFFF;
-  box-shadow: 
+  box-shadow:
     0 6px 20px rgba(30, 144, 255, 0.35),
     0 2px 8px rgba(30, 144, 255, 0.25);
 }
@@ -99,7 +99,7 @@ body.page-appointments {
   border: 2px solid rgba(30, 144, 255, 0.15);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(30, 144, 255, 0.1),
     0 4px 8px rgba(30, 144, 255, 0.05);
 }
@@ -136,14 +136,46 @@ body.page-appointments {
 }
 
 /* Column Width Distribution */
-.appointments-table thead th:nth-child(1) { width: 10%; } /* Service */
-.appointments-table thead th:nth-child(2) { width: 22%; } /* Church */
-.appointments-table thead th:nth-child(3) { width: 13%; } /* Appointment ID */
-.appointments-table thead th:nth-child(4) { width: 13%; } /* Date */
-.appointments-table thead th:nth-child(5) { width: 12%; } /* Time */
-.appointments-table thead th:nth-child(6) { width: 12%; } /* Requested */
-.appointments-table thead th:nth-child(7) { width: 11%; } /* Status */
-.appointments-table thead th:nth-child(8) { width: 7%; } /* Actions */
+.appointments-table thead th:nth-child(1) {
+  width: 10%;
+}
+
+/* Service */
+.appointments-table thead th:nth-child(2) {
+  width: 22%;
+}
+
+/* Church */
+.appointments-table thead th:nth-child(3) {
+  width: 13%;
+}
+
+/* Appointment ID */
+.appointments-table thead th:nth-child(4) {
+  width: 13%;
+}
+
+/* Date */
+.appointments-table thead th:nth-child(5) {
+  width: 12%;
+}
+
+/* Time */
+.appointments-table thead th:nth-child(6) {
+  width: 12%;
+}
+
+/* Requested */
+.appointments-table thead th:nth-child(7) {
+  width: 11%;
+}
+
+/* Status */
+.appointments-table thead th:nth-child(8) {
+  width: 7%;
+}
+
+/* Actions */
 
 .appointments-table tbody tr.appointment-row {
   border-bottom: 1px solid rgba(30, 144, 255, 0.1);
@@ -400,19 +432,46 @@ body.page-appointments {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.badge-requested {
+.badge-requested,
+.badge-form_requested {
   background: linear-gradient(135deg, #FFF9E6 0%, #FFE4A3 100%);
   color: #8B6914;
   border: 1px solid #E6D19A;
 }
 
-.badge-reviewed {
+.badge-reviewed,
+.badge-form_provided,
+.badge-form_submitted,
+.badge-form_processing {
   background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
   color: #1565C0;
   border: 1px solid #90CAF9;
 }
 
-.badge-approved {
+.badge-pending_requirements {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+  color: #9A3412;
+  border: 1px solid #FED7AA;
+}
+
+.badge-ready_to_schedule,
+.badge-form_approved {
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  color: #3730A3;
+  border: 1px solid #C7D2FE;
+}
+
+.badge-pastor_selection,
+.badge-pastor_assigned,
+.badge-scheduling {
+  background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+  color: #5B21B6;
+  border: 1px solid #DDD6FE;
+}
+
+.badge-approved,
+.badge-scheduled,
+.badge-confirmed {
   background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
   color: #2E7D32;
   border: 1px solid #A5D6A7;
@@ -430,11 +489,36 @@ body.page-appointments {
   border: 1px solid #EF9A9A;
 }
 
+.badge-reschedule {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  color: #B45309;
+  border: 1px solid #FDE68A;
+}
+
 .badge-canceled {
   background: linear-gradient(135deg, #F5F5F5 0%, #E0E0E0 100%);
   color: #616161;
   border: 1px solid #BDBDBD;
 }
+
+.badge-interview_completed {
+  background: linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%);
+  color: #303F9F;
+  border: 1px solid #9FA8DA;
+}
+
+.badge-event_scheduled {
+  background: linear-gradient(135deg, #E0F2F1 0%, #B2DFDB 100%);
+  color: #00695C;
+  border: 1px solid #80CBC4;
+}
+
+.badge-schedule_requested {
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  color: #E65100;
+  border: 1px solid #FFCC80;
+}
+
 
 /* =============================================================================
    RESPONSIVE DESIGN
@@ -445,7 +529,7 @@ body.page-appointments {
     padding: 12px 8px;
     font-size: 12px;
   }
-  
+
   .appointments-table tbody td {
     padding: 12px 8px;
     font-size: 13px;
@@ -453,11 +537,12 @@ body.page-appointments {
 }
 
 @media (max-width: 1024px) {
+
   /* Stack table for tablets */
   .appointments-table-container {
     overflow-x: auto;
   }
-  
+
   .appointments-table {
     min-width: 900px;
   }
@@ -467,18 +552,18 @@ body.page-appointments {
   .content .appointments-page {
     --page-padding: 12px 16px;
   }
-  
+
   .status-pills {
     flex-direction: column;
     align-items: stretch;
     gap: 0.5rem;
   }
-  
+
   /* Convert table to card layout on mobile */
   .appointments-table-container {
     border-radius: 12px;
   }
-  
+
   .appointments-table,
   .appointments-table thead,
   .appointments-table tbody,
@@ -487,11 +572,11 @@ body.page-appointments {
   .appointments-table tr {
     display: block;
   }
-  
+
   .appointments-table thead {
     display: none;
   }
-  
+
   .appointments-table tbody tr.appointment-row {
     margin-bottom: 16px;
     border: 2px solid rgba(30, 144, 255, 0.15);
@@ -499,11 +584,11 @@ body.page-appointments {
     padding: 16px;
     background: rgba(255, 255, 255, 0.98);
   }
-  
+
   .appointments-table tbody tr.appointment-row:hover {
     transform: none;
   }
-  
+
   .appointments-table tbody td {
     padding: 8px 0;
     border: none;
@@ -511,7 +596,7 @@ body.page-appointments {
     justify-content: space-between;
     align-items: center;
   }
-  
+
   .appointments-table tbody td::before {
     content: attr(data-label);
     font-weight: 700;
@@ -522,54 +607,54 @@ body.page-appointments {
     flex-shrink: 0;
     margin-right: 12px;
   }
-  
+
   .service-cell::before {
     content: "Service";
   }
-  
+
   .church-cell::before {
     content: "Church";
   }
-  
+
   .id-cell::before {
     content: "ID";
   }
-  
+
   .date-cell::before {
     content: "Date";
   }
-  
+
   .time-cell::before {
     content: "Time";
   }
-  
+
   .requested-cell::before {
     content: "Requested";
   }
-  
+
   .status-cell::before {
     content: "Status";
   }
-  
+
   .actions-cell::before {
     content: "Actions";
   }
-  
+
   .actions-cell .action-buttons {
     justify-content: flex-end;
   }
-  
+
   .decline-reason-row {
     margin-top: -16px;
     margin-bottom: 16px;
     border-radius: 0 0 12px 12px;
     padding: 12px 16px;
   }
-  
+
   .decline-reason-row td {
     padding: 0;
   }
-  
+
   .decline-reason-row td::before {
     display: none;
   }
@@ -579,26 +664,26 @@ body.page-appointments {
   .status-pills {
     padding: 1rem;
   }
-  
+
   .status-pill {
     justify-content: center;
     padding: 0.6rem 1rem;
   }
-  
+
   .appointments-table tbody tr.appointment-row {
     padding: 12px;
   }
-  
+
   .appointments-table tbody td {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
-  
+
   .appointments-table tbody td::before {
     margin-bottom: 4px;
   }
-  
+
   .actions-cell .action-buttons {
     width: 100%;
     justify-content: flex-start;
@@ -658,6 +743,7 @@ body.page-appointments {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1094,17 +1180,18 @@ body.page-appointments {
 
 /* Print Styles */
 @media print {
+
   /* Page setup */
   @page {
     size: legal;
     margin: 0.5in;
   }
-  
+
   /* Modal body setup */
   .modal-body {
     position: relative !important;
   }
-  
+
   /* Ensure content is above watermark */
   .invoice-header,
   .invoice-parties,
@@ -1116,66 +1203,66 @@ body.page-appointments {
     z-index: 2 !important;
     background: transparent !important;
   }
-  
+
   /* Show print-only elements when printing */
   .print-only {
     display: block !important;
   }
-  
+
   /* Show invoice logo when printing */
   .invoice-logo {
     display: block !important;
   }
-  
+
   .modal-overlay {
     position: static !important;
     background: white !important;
     backdrop-filter: none !important;
   }
-  
+
   .modal-container {
     max-width: 100% !important;
     width: 100% !important;
     box-shadow: none !important;
     border-radius: 0 !important;
   }
-  
+
   .modal-header {
     background: white !important;
     color: black !important;
     border-bottom: 2px solid #000 !important;
     padding: 10px 0 !important;
   }
-  
+
   .modal-title,
   .modal-subtitle {
     color: black !important;
   }
-  
+
   .modal-icon {
     background: #f0f0f0 !important;
   }
-  
+
   .modal-close-btn,
   .modal-footer {
     display: none !important;
   }
-  
+
   .info-card {
     page-break-inside: avoid !important;
   }
-  
+
   .modal-body {
     background: white !important;
     padding: 1rem !important;
   }
-  
+
   /* Signature section styling for print */
   .signature-section {
     margin-top: 30px !important;
     page-break-inside: avoid !important;
   }
-  
+
   .invoice-footer-note {
     margin-top: 15px !important;
     padding-top: 10px !important;
@@ -1184,11 +1271,11 @@ body.page-appointments {
     color: #6b7280 !important;
     text-align: center !important;
   }
-  
+
   .invoice-footer-note p {
     margin: 3px 0 !important;
   }
-  
+
   /* Reduce spacing for all sections to fit on one page */
   .invoice-header {
     margin-bottom: 10px !important;
@@ -1198,108 +1285,108 @@ body.page-appointments {
     padding-bottom: 10px !important;
     border-bottom: 2px solid #e5e7eb !important;
   }
-  
+
   .invoice-logo {
     flex-shrink: 0 !important;
   }
-  
+
   .invoice-logo img {
     height: 50px !important;
     width: auto !important;
     display: block !important;
   }
-  
+
   .invoice-title-section {
     flex: 1 !important;
   }
-  
+
   .invoice-title {
     font-size: 18px !important;
     margin: 0 0 5px 0 !important;
     font-weight: 700 !important;
     line-height: 1.2 !important;
   }
-  
+
   .invoice-number {
     font-size: 11px !important;
     margin-bottom: 4px !important;
   }
-  
+
   .invoice-number .label {
     font-weight: 600 !important;
     color: #4b5563 !important;
   }
-  
+
   .invoice-number .value {
     color: #1f2937 !important;
     font-weight: 600 !important;
   }
-  
+
   .invoice-status {
     margin-top: 4px !important;
   }
-  
+
   .invoice-dates {
     text-align: right !important;
     flex-shrink: 0 !important;
   }
-  
+
   .date-item {
     font-size: 10px !important;
     margin-bottom: 3px !important;
   }
-  
+
   .date-item .label {
     font-weight: 600 !important;
     color: #6b7280 !important;
   }
-  
+
   .date-item .value {
     color: #1f2937 !important;
   }
-  
+
   .invoice-parties {
     margin-bottom: 8px !important;
     display: flex !important;
     gap: 12px !important;
   }
-  
+
   .invoice-details {
     margin-bottom: 8px !important;
   }
-  
+
   .invoice-notes {
     margin-bottom: 8px !important;
   }
-  
+
   .section-title {
     margin-bottom: 6px !important;
     font-size: 12px !important;
     font-weight: 700 !important;
     color: #1f2937 !important;
   }
-  
+
   .details-table {
     width: 100% !important;
     border-collapse: collapse !important;
   }
-  
+
   .details-table tr td {
     padding: 4px 6px !important;
     font-size: 11px !important;
     border-bottom: 1px solid #f3f4f6 !important;
   }
-  
+
   .detail-label {
     font-weight: 600 !important;
     color: #4b5563 !important;
     width: 40% !important;
   }
-  
+
   .detail-value {
     color: #1f2937 !important;
   }
-  
+
   .party-box {
     padding: 10px !important;
     flex: 1 !important;
@@ -1307,7 +1394,7 @@ body.page-appointments {
     border: 1px solid #e5e7eb !important;
     border-radius: 4px !important;
   }
-  
+
   .party-title {
     font-size: 10px !important;
     margin-bottom: 6px !important;
@@ -1316,14 +1403,14 @@ body.page-appointments {
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
   }
-  
+
   .party-name {
     font-size: 12px !important;
     margin-bottom: 3px !important;
     font-weight: 600 !important;
     color: #111827 !important;
   }
-  
+
   .party-detail {
     font-size: 10px !important;
     margin-bottom: 1px !important;
@@ -1341,11 +1428,11 @@ body.page-appointments {
     max-height: 100vh !important;
     border-radius: 0 !important;
   }
-  
+
   .info-card-grid {
     grid-template-columns: 1fr !important;
   }
-  
+
   .review-modal {
     width: 100% !important;
     max-width: 100% !important;
@@ -1552,4 +1639,560 @@ body.page-appointments {
   opacity: 0.6 !important;
   cursor: not-allowed !important;
   transform: none !important;
+}
+
+/* =============================================================================
+   PRIEST SELECTOR TRIGGER (Replaces dropdown)
+   ============================================================================= */
+
+.priest-selector-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border: 2px solid rgba(30, 144, 255, 0.2);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FAFCFF 0%, #F0F7FF 100%);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 6px;
+}
+
+.priest-selector-trigger:hover {
+  border-color: rgba(30, 144, 255, 0.5);
+  background: linear-gradient(135deg, #F0F7FF 0%, #E3F0FF 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.15);
+}
+
+.priest-selector-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.priest-selector-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1E90FF 0%, #4169E1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
+}
+
+.priest-selector-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.priest-selector-label {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1A3A52;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.priest-selector-hint {
+  font-size: 12px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.priest-selector-arrow {
+  color: #1E90FF;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.priest-selector-trigger:hover .priest-selector-arrow {
+  transform: translateX(3px);
+}
+
+/* =============================================================================
+   PRIEST SELECTION MODAL
+   ============================================================================= */
+
+.priest-modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  z-index: 1000000001 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+.priest-modal-overlay[style*="display: flex"] {
+  display: flex !important;
+}
+
+.priest-modal-container {
+  background: white;
+  border-radius: 20px;
+  width: 94%;
+  max-width: 620px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.25),
+    0 10px 30px rgba(30, 144, 255, 0.1);
+  animation: priestModalSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 1000000002;
+}
+
+@keyframes priestModalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal Header */
+.priest-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(30, 144, 255, 0.1);
+  background: linear-gradient(135deg, #FAFCFF 0%, #F0F7FF 100%);
+}
+
+.priest-modal-header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.priest-modal-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1E90FF 0%, #4169E1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(30, 144, 255, 0.35);
+}
+
+.priest-modal-header h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1A3A52;
+  letter-spacing: -0.3px;
+}
+
+.priest-modal-header p {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.priest-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.priest-modal-close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #374151;
+}
+
+/* Modal Body */
+.priest-modal-body {
+  padding: 20px 28px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Priest Cards */
+.priest-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 2px solid #E5E7EB;
+  border-radius: 16px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.priest-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.03) 0%, rgba(65, 105, 225, 0.03) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: 14px;
+}
+
+.priest-card:hover {
+  border-color: rgba(30, 144, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(30, 144, 255, 0.12);
+}
+
+.priest-card:hover::before {
+  opacity: 1;
+}
+
+.priest-card.selected {
+  border-color: #1E90FF;
+  background: linear-gradient(135deg, #F0F7FF 0%, #E8F2FF 100%);
+  box-shadow:
+    0 0 0 3px rgba(30, 144, 255, 0.15),
+    0 8px 25px rgba(30, 144, 255, 0.15);
+}
+
+.priest-card:active {
+  transform: translateY(0);
+}
+
+/* Selection Indicator */
+.priest-card-selected-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1E90FF 0%, #4169E1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 3px 10px rgba(30, 144, 255, 0.4);
+}
+
+.priest-card.selected .priest-card-selected-indicator {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Priest Avatar */
+.priest-card-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #E8F4FF 0%, #D0E8FF 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(30, 144, 255, 0.15);
+  transition: border-color 0.3s ease;
+}
+
+.priest-card:hover .priest-card-avatar,
+.priest-card.selected .priest-card-avatar {
+  border-color: rgba(30, 144, 255, 0.35);
+}
+
+.priest-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.priest-card-avatar-initial {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1E90FF;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.priest-card-avatar-any {
+  background: linear-gradient(135deg, #E0F0FF 0%, #CCE5FF 100%);
+  color: #1E90FF;
+}
+
+/* Priest Card Info */
+.priest-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.priest-card-name {
+  margin: 0 0 3px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1A3A52;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 30px;
+}
+
+.priest-card-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1E90FF;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.priest-card-desc {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: #6B7280;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Priest Card Meta Tags */
+.priest-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.priest-card-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(30, 144, 255, 0.08);
+  color: #1E70C0;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.priest-card-tag svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.priest-card-tag.tag-availability {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.priest-card-tag.tag-specialization {
+  background: rgba(139, 92, 246, 0.08);
+  color: #7C3AED;
+}
+
+.priest-card-tag.tag-prep-days {
+  background: rgba(245, 158, 11, 0.1);
+  color: #D97706;
+}
+
+
+/* Loading State */
+.priest-cards-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 16px;
+}
+
+.priest-cards-loading p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.priest-cards-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(30, 144, 255, 0.15);
+  border-top-color: #1E90FF;
+  border-radius: 50%;
+  animation: priestSpin 0.8s linear infinite;
+}
+
+@keyframes priestSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty State */
+.priest-cards-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 10px;
+  color: #9CA3AF;
+}
+
+.priest-cards-empty p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #6B7280;
+  font-weight: 600;
+}
+
+.priest-cards-empty small {
+  font-size: 0.82rem;
+  color: #9CA3AF;
+}
+
+/* Modal Footer */
+.priest-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 18px 28px;
+  border-top: 1px solid rgba(30, 144, 255, 0.1);
+  background: linear-gradient(135deg, #FAFCFF 0%, #F5F9FF 100%);
+}
+
+.priest-modal-footer .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 2px solid;
+}
+
+.priest-modal-footer .btn-outline {
+  background: white;
+  color: #6B7280;
+  border-color: #D1D5DB;
+}
+
+.priest-modal-footer .btn-outline:hover {
+  background: #F9FAFB;
+  color: #374151;
+  border-color: #9CA3AF;
+}
+
+.priest-modal-footer .btn-primary {
+  background: linear-gradient(135deg, #1E90FF 0%, #4169E1 100%);
+  color: white;
+  border-color: #1E90FF;
+  box-shadow: 0 4px 14px rgba(30, 144, 255, 0.35);
+}
+
+.priest-modal-footer .btn-primary:hover {
+  background: linear-gradient(135deg, #1873CC 0%, #3557B8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.45);
+}
+
+.priest-modal-footer .btn-primary svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .priest-modal-container {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    height: 100vh;
+  }
+
+  .priest-modal-body {
+    padding: 16px;
+  }
+
+  .priest-modal-header {
+    padding: 18px 16px 14px;
+  }
+
+  .priest-modal-footer {
+    padding: 14px 16px;
+  }
+
+  .priest-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .priest-card-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+  }
+
+  .priest-card-name {
+    font-size: 0.9rem;
+  }
+
+  .priest-card-meta {
+    gap: 4px;
+  }
+
+  .priest-card-tag {
+    font-size: 0.68rem;
+    padding: 2px 8px;
+  }
 }

@@ -1,0 +1,56 @@
+CHAPTER 5
+SUMMARY, CONCLUSION AND RECOMMENDATION
+
+In this chapter, the findings summary is presented, as well as the conclusions of the. study, and recommendations.
+Summary of Findings
+1.	Parish staff gave the platform an 85.0 rating but it scored 57.9 from. the 48 citizens a 27-point divide that narrates the actual narrative. The system works very well to the single individual who is concerned with it day after day, but is peripheral to everyone else. Employees scored ease of use and confidence at 100 points each, as half citizens believed the platform to be cumbersome and required. much of learning they had before them could start. This isn't about dissenting views; it is a system that administrators should have, not the community it serves.
+2.	Those features that were valued by citizens included consistency, feature integration and the readiness to use it on a regular basis (68.25). The technical background is sound. But in doing it comes the thing. making a donation the experience falls under something booking a service. apart. The lowest scores were concentrated on confidence, learning curve, and cumbersome navigation. The people desire to utilize the platform; they simply. have to get them to feel inadequate or confused whenever they make the attempt.
+3.	The 27-point difference shows a severe weakness: the site assumes the universal. and comfort level is equivalent to daily users. Staff rated learnability at 75.00, thinking that the majority would select it at a fast pace. Citizens rated it at 50.00 said they required time and in most cases technical. support just to get started. When your system is intuitive only after. months of daily usage, you have not created on your real audience aged. occasionally, parishioners, individuals with little technology experience. The platform has to come to people at their level, not at that of administrators. wish they were.
+	
+Conclusion
+	Iligan Diocese platform has a score of 58.6 out of 100, which ranks the platform in. the Below Average category is working, yet not doing well in comparison to the industry. Good (68) standard of usability. The system also works yet not equally well on everyone who needs it.
+There are real strengths associated with the platform. Features work effectively with each other. The interface is consistent (79.26), (68.80), and when users are aware of what they need to do, the interface is consistent. process of booking and donation is logical. These scores are demonstrating the technical. foundation is sound the very characteristics take effect.
+It is not the nature of the problem of the system it is the way people feel about using it. Only 50.80 out of half of the users (50.80) are confident of being able to navigate on their own. Even worse, most think that they require technical assistance to utilize it (48.83) -the lowest score of all. measures. The learning curve is steeper (46.26) and even after the integration was good, the. system feels cumbersome (46.26). Users do not find it easy due to broken features. but since they cannot find them, do not know where to begin, or even whether they are. doing things correctly.
+This is the gap of confidence that strikes the most to the aged parishioners-the very individuals. the platform should serve. Numerous elderly people are not digitally literate and already. have fears regarding new technology. In the event they come across a system that needs. technical help and massive education, they sacrifice instead of demand assistance. The platform was supposed to assist a grandparent in reserving the baptism of her grandchild. becomes a barrier instead.
+Staff at the parish scored the system 87.5(Excellent) which they use daily and are aware of. every shortcut. It scored 57.4 (Below Average) amongst ordinary parishioners. That's a 30- point gap. The platform is fantastic to the 2 individuals in charge of it but is clumsy to the consumers. boggles the 48 who attempts to make occasional use of it.
+The good news? The basic features are what they merely require a superior scaffolding. Add interactive onboarding guidelines, enhance the navigation, decrease the form fields to under. needs, and present good improvement indicators. Build confidence through more confirmation messages, undo buttons and useful error messages. Consider a "Senior Mode" with larger text and fewer options.
+The 58.6 score is not a verdict it is a plan. Close the confidence gap, ease the learning process and eliminate the technical support request. Then this system is what it can be: a point of transition between the whole parish community. no matter what age or technical capacity. It is then that the score will not show. it's not functional competence, but actual availability to all to whom it is intended to be. serve.	
+
+Recommendations
+These are the things, according to the assessment, that are required to correct to get the. Diocese of Iligan site which is operational to everyone, not only administrators.
+1. Correct Payment, citizens are unable to complete the process of donating as half of them do not use PayPal.
+•	Add GCash and PayMaya what Filipinos actually use
+•	Add bank transfer with clear instructions
+•	Simplify the payment flow—no confusing redirects
+•	Show security badges so users trust the process
+2. Redesign the Booking some of the citizens can't figure out which dates are available.
+•	Show availability with color-coded dates (green = available, gray = booked)
+•	Add a "Next Available" button for quick booking
+•	Make the calendar work better on phones with larger touch targets
+•	Let users preview their booking before submitting
+3. Simplify the Booking Form, too many required fields overwhelm users.
+•	Cut required fields to essentials: name, contact, service, date/time
+•	Hide optional fields under "Show More"
+•	Pre-fill information for logged-in users
+•	Show examples for each field ("Phone: 0917-123-4567")
+•	Add a progress bar ("Step 2 of 3")
+4. Some of the users feel confident using the system alone.
+•	Add a 5-step tutorial for first-time users
+•	Create short video guides (2-3 minutes) in Filipino and English
+•	Put help buttons on every page
+•	Add an FAQ section
+•	Offer phone support during business hours
+5. Optimize for Mobile (Moderate Priority - Score: 3.9) Most citizens use phones, not computers.
+•	Build a Progressive Web App (PWA) that works like an app without downloads
+•	Make it work offline for viewing bulletins
+•	Optimize for touch with larger tap targets
+•	Let users add it to their home screen
+6. Add SMS Notifications (Moderate Priority) Not everyone checks email or app notifications.
+•	Send SMS confirmations for bookings
+•	Send reminders 24 hours before appointments
+•	Send donation receipts via text
+•	Let users choose their notification preferences
+7. Add Filipino and Cebuano (Future Enhancement) Some parishioners prefer their local language.
+•	Add language toggle for English, Filipino, and Cebuano
+•	Save language preference for return visits
+These aren't nice-to-haves they're essential to serving the 96% citizen majority. Fix the top four, and you'll transform the platform from "frustrating but functional" to "actually helpful." The technology is solid. Now make it accessible
